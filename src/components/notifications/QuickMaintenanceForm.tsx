@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { TR, MAINTENANCE_TYPE_LABELS } from '../../constants/tr';
 import { addMaintenanceRecord } from '../../hooks/useMaintenance';
 import { todayISO } from '../../utils/dates';
@@ -17,6 +17,16 @@ export default function QuickMaintenanceForm({ customerId, customerName, open, o
   const [type, setType] = useState<MaintenanceType>('filter_replacement');
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [open, onClose]);
 
   if (!open) return null;
 
@@ -31,8 +41,7 @@ export default function QuickMaintenanceForm({ customerId, customerName, open, o
       setType('filter_replacement');
       setNotes('');
       onClose();
-    } catch (err) {
-      console.error('Failed to add maintenance:', err);
+    } catch {
       showToast(TR.maintenanceSaveFailed, 'error');
     } finally {
       setSaving(false);
@@ -42,8 +51,12 @@ export default function QuickMaintenanceForm({ customerId, customerName, open, o
   const inputClass = 'w-full px-3 py-2.5 rounded-xl border border-gray-300 text-base focus:outline-none focus:ring-2 focus:ring-water-500 min-h-[44px]';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 animate-fade-in" onClick={onClose}>
+    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/40 animate-fade-in" onClick={onClose}>
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={TR.maintenanceDone}
         className="bg-white rounded-t-2xl w-full max-w-lg p-5 shadow-xl animate-modal-in"
         onClick={e => e.stopPropagation()}
       >
@@ -65,7 +78,7 @@ export default function QuickMaintenanceForm({ customerId, customerName, open, o
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">{TR.notes}</label>
-            <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2} className={`${inputClass} resize-none`} />
+            <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2} maxLength={1000} className={`${inputClass} resize-none`} />
           </div>
           <div className="flex gap-2 pt-1">
             <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-xl text-sm font-medium bg-gray-100 text-gray-700 active:bg-gray-200 min-h-[44px]">

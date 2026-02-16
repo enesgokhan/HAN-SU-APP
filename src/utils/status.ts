@@ -46,3 +46,9 @@ export const STATUS_LABELS: Record<MaintenanceStatus, string> = {
   upcoming: TR.upcoming,
   ok: TR.ok,
 };
+
+export function formatDaysText(daysUntilDue: number): string {
+  if (daysUntilDue === 0) return TR.dueToday;
+  if (daysUntilDue < 0) return TR.daysOverdue(daysUntilDue);
+  return TR.daysUntilDue(daysUntilDue);
+}

@@ -2,8 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronRight, Phone } from 'lucide-react';
 import type { CustomerMaintenanceView } from '../../types';
 import { formatDateShort } from '../../utils/dates';
-import { STATUS_CONFIG } from '../../utils/status';
-import { TR } from '../../constants/tr';
+import { STATUS_CONFIG, formatDaysText } from '../../utils/status';
 
 interface CustomerCardProps {
   view: CustomerMaintenanceView;
@@ -14,15 +13,10 @@ export default function CustomerCard({ view }: CustomerCardProps) {
   const { customer, status, daysUntilDue, effectiveDueDate } = view;
   const config = STATUS_CONFIG[status];
 
-  const daysText =
-    daysUntilDue === 0
-      ? TR.dueToday
-      : daysUntilDue < 0
-        ? TR.daysOverdue(daysUntilDue)
-        : TR.daysUntilDue(daysUntilDue);
-
   return (
     <div
+      role="button"
+      aria-label={`${customer.name} - ${formatDaysText(daysUntilDue)}`}
       onClick={() => navigate(`/customers/${customer.id}`)}
       className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer interactive-press flex"
     >
@@ -40,8 +34,8 @@ export default function CustomerCard({ view }: CustomerCardProps) {
             <span>{customer.phone}</span>
           </div>
           <div className="flex items-center gap-2 mt-1">
-            <span className="text-xs text-gray-400">{formatDateShort(effectiveDueDate)}</span>
-            <span className={`text-xs font-semibold ${config.text}`}>{daysText}</span>
+            <span className="text-xs text-gray-500">{formatDateShort(effectiveDueDate)}</span>
+            <span className={`text-xs font-semibold ${config.text}`}>{formatDaysText(daysUntilDue)}</span>
           </div>
         </div>
         <ChevronRight size={16} className="text-gray-300 shrink-0" />

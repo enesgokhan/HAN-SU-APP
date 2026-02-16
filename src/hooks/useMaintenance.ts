@@ -63,5 +63,5 @@ export function useMonthlyMaintenanceCount() {
       .where('date')
       .between(start, end, true, false)
       .count();
-  });
+  }, []);
 }

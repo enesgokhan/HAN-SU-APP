@@ -10,11 +10,23 @@ interface PageHeaderProps {
 export default function PageHeader({ title, showBack, right }: PageHeaderProps) {
   const navigate = useNavigate();
 
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate('/');
+    }
+  };
+
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-200 px-4 py-2 flex items-center gap-2 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+    <header
+      className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-200 px-4 py-2 flex items-center gap-2 shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
+      style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top))' }}
+    >
       {showBack && (
         <button
-          onClick={() => navigate(-1)}
+          onClick={handleBack}
+          aria-label="Geri"
           className="w-11 h-11 flex items-center justify-center -ml-2 rounded-xl active:bg-gray-100"
         >
           <ArrowLeft size={22} className="text-gray-700" />

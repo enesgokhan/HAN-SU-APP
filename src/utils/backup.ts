@@ -1,5 +1,12 @@
 import { db } from '../db/database';
-import type { BackupData } from '../types';
+import type { BackupData, MaintenanceType } from '../types';
+
+const MAX_BACKUP_SIZE = 50 * 1024 * 1024; // 50 MB
+const MAX_RECORDS = 10000;
+const VALID_MAINTENANCE_TYPES: MaintenanceType[] = ['filter_replacement', 'membrane_replacement', 'general_maintenance', 'repair', 'other'];
+
+const isString = (v: unknown): v is string => typeof v === 'string';
+const isValidDate = (v: string) => /^\d{4}-\d{2}-\d{2}/.test(v);
 
 export async function exportBackup(): Promise<void> {
   const data: BackupData = {
@@ -34,57 +41,112 @@ export async function exportBackup(): Promise<void> {
 
 export async function importBackup(file: File): Promise<{ success: boolean; error?: string }> {
   try {
+    // File size check
+    if (file.size > MAX_BACKUP_SIZE) {
+      return { success: false, error: 'Yedek dosyası çok büyük' };
+    }
+
     const text = await file.text();
-    const data = JSON.parse(text) as BackupData;
+    const raw = JSON.parse(text);
 
     // Validate top-level structure
-    if (!data.version || !Array.isArray(data.customers) || !Array.isArray(data.maintenanceRecords)) {
+    if (!raw || typeof raw !== 'object' || !raw.version || !Array.isArray(raw.customers) || !Array.isArray(raw.maintenanceRecords)) {
       return { success: false, error: 'Geçersiz yedek dosyası formatı' };
     }
 
-    if (data.version !== 1) {
-      return { success: false, error: `Desteklenmeyen versiyon: ${data.version}` };
+    if (raw.version !== 1) {
+      return { success: false, error: `Desteklenmeyen versiyon: ${raw.version}` };
     }
 
-    // Validate customers
-    if (data.customers.some(c => !c.id || !c.name || !c.phone || !c.installationDate)) {
+    // Record count limits
+    if (raw.customers.length > MAX_RECORDS || raw.maintenanceRecords.length > MAX_RECORDS) {
+      return { success: false, error: 'Yedek dosyası çok fazla kayıt içeriyor' };
+    }
+
+    // Validate and sanitize customers
+    if (raw.customers.some((c: Record<string, unknown>) =>
+      !isString(c.id) || !isString(c.name) || !isString(c.phone) ||
+      !isString(c.installationDate) || !isValidDate(c.installationDate as string)
+    )) {
       return { success: false, error: 'Yedek dosyasında bozuk müşteri verisi var' };
     }
 
-    // Validate maintenance records
-    if (data.maintenanceRecords.some(r => !r.id || !r.customerId || !r.date || !r.type)) {
+    const customers = raw.customers.map((c: Record<string, unknown>) => ({
+      id: c.id as string,
+      name: c.name as string,
+      phone: c.phone as string,
+      address: (isString(c.address) ? c.address : '') as string,
+      installationDate: c.installationDate as string,
+      notes: (isString(c.notes) ? c.notes : '') as string,
+      maintenanceCycleMonths: typeof c.maintenanceCycleMonths === 'number' ? c.maintenanceCycleMonths : undefined,
+      active: typeof c.active === 'boolean' ? c.active : undefined,
+      createdAt: isString(c.createdAt) ? c.createdAt : new Date().toISOString(),
+      updatedAt: isString(c.updatedAt) ? c.updatedAt : new Date().toISOString(),
+    }));
+
+    // Validate and sanitize maintenance records
+    if (raw.maintenanceRecords.some((r: Record<string, unknown>) =>
+      !isString(r.id) || !isString(r.customerId) || !isString(r.date) || !isString(r.type)
+    )) {
       return { success: false, error: 'Yedek dosyasında bozuk bakım verisi var' };
     }
 
+    if (raw.maintenanceRecords.some((r: Record<string, unknown>) =>
+      !VALID_MAINTENANCE_TYPES.includes(r.type as MaintenanceType)
+    )) {
+      return { success: false, error: 'Yedek dosyasında geçersiz bakım türü var' };
+    }
+
     // Validate referential integrity
-    const customerIds = new Set(data.customers.map(c => c.id));
-    if (data.maintenanceRecords.some(r => !customerIds.has(r.customerId))) {
+    const customerIds = new Set(customers.map((c: { id: string }) => c.id));
+    if (raw.maintenanceRecords.some((r: Record<string, unknown>) => !customerIds.has(r.customerId as string))) {
       return { success: false, error: 'Bakım kayıtlarında bilinmeyen müşteri referansı var' };
     }
 
+    const maintenanceRecords = raw.maintenanceRecords.map((r: Record<string, unknown>) => ({
+      id: r.id as string,
+      customerId: r.customerId as string,
+      date: r.date as string,
+      type: r.type as MaintenanceType,
+      notes: isString(r.notes) ? r.notes : '',
+      createdAt: isString(r.createdAt) ? r.createdAt : new Date().toISOString(),
+    }));
+
     // Validate reminder overrides if present
-    const overrides = data.reminderOverrides ?? [];
-    if (overrides.some(r => !r.id || !r.customerId || !r.snoozedUntil)) {
+    const rawOverrides = Array.isArray(raw.reminderOverrides) ? raw.reminderOverrides : [];
+    if (rawOverrides.length > MAX_RECORDS) {
+      return { success: false, error: 'Yedek dosyası çok fazla kayıt içeriyor' };
+    }
+
+    if (rawOverrides.some((r: Record<string, unknown>) => !isString(r.id) || !isString(r.customerId) || !isString(r.snoozedUntil))) {
       return { success: false, error: 'Yedek dosyasında bozuk hatırlatma verisi var' };
     }
 
-    if (overrides.some(r => !customerIds.has(r.customerId))) {
+    if (rawOverrides.some((r: Record<string, unknown>) => !customerIds.has(r.customerId as string))) {
       return { success: false, error: 'Hatırlatma kayıtlarında bilinmeyen müşteri referansı var' };
     }
+
+    const overrides = rawOverrides.map((r: Record<string, unknown>) => ({
+      id: r.id as string,
+      customerId: r.customerId as string,
+      originalDueDate: isString(r.originalDueDate) ? r.originalDueDate : '',
+      snoozedUntil: r.snoozedUntil as string,
+      reason: isString(r.reason) ? r.reason : '',
+      createdAt: isString(r.createdAt) ? r.createdAt : new Date().toISOString(),
+    }));
 
     await db.transaction('rw', db.customers, db.maintenanceRecords, db.reminderOverrides, async () => {
       await db.customers.clear();
       await db.maintenanceRecords.clear();
       await db.reminderOverrides.clear();
 
-      await db.customers.bulkAdd(data.customers);
-      await db.maintenanceRecords.bulkAdd(data.maintenanceRecords);
+      await db.customers.bulkAdd(customers);
+      await db.maintenanceRecords.bulkAdd(maintenanceRecords);
       await db.reminderOverrides.bulkAdd(overrides);
     });
 
     return { success: true };
-  } catch (err) {
-    console.error('Backup import failed:', err);
+  } catch {
     return { success: false, error: 'Dosya okunamadı veya geçersiz JSON formatı' };
   }
 }

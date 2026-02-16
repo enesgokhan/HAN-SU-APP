@@ -1,11 +1,10 @@
 import { NavLink } from 'react-router-dom';
 import { Home, Bell, Users } from 'lucide-react';
 import { TR } from '../../constants/tr';
-import { useDashboard } from '../../hooks/useDashboard';
+import { useOverdueCount } from '../../hooks/useDashboard';
 
 export default function BottomNav() {
-  const views = useDashboard('');
-  const overdueCount = views?.filter(v => v.status === 'overdue').length ?? 0;
+  const overdueCount = useOverdueCount() ?? 0;
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
     `relative flex flex-col items-center justify-center gap-0.5 py-2 flex-1 text-xs font-medium transition-colors duration-200 min-h-[56px] ${
@@ -14,7 +13,7 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200/80 flex items-center z-50 shadow-[0_-1px_4px_rgba(0,0,0,0.06)]"
+      className="fixed bottom-0 left-0 right-0 max-w-lg mx-auto bg-white/95 backdrop-blur-sm border-t border-gray-200/80 flex items-center z-50 shadow-[0_-1px_4px_rgba(0,0,0,0.06)]"
       style={{ paddingBottom: 'max(0.25rem, env(safe-area-inset-bottom))' }}
     >
       <NavLink to="/" className={linkClass} end>
@@ -26,7 +25,11 @@ export default function BottomNav() {
           </>
         )}
       </NavLink>
-      <NavLink to="/notifications" className={linkClass}>
+      <NavLink
+        to="/notifications"
+        className={linkClass}
+        aria-label={overdueCount > 0 ? `${TR.navNotifications} (${overdueCount} ${TR.overdue.toLowerCase()})` : TR.navNotifications}
+      >
         {({ isActive }) => (
           <>
             {isActive && <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-water-500 rounded-full" />}

@@ -40,7 +40,8 @@ export default function MaintenanceHistory({ records }: MaintenanceHistoryProps)
             </div>
             <button
               onClick={() => setDeleteId(record.id)}
-              className="w-10 h-10 flex items-center justify-center rounded-lg text-gray-400 active:text-red-500 active:bg-red-50"
+              aria-label="Bakımı sil"
+              className="w-11 h-11 flex items-center justify-center rounded-lg text-gray-400 active:text-red-500 active:bg-red-50"
             >
               <Trash2 size={16} />
             </button>

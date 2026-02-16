@@ -33,11 +33,27 @@ export default function DashboardPage() {
       .sort((a, b) => a.daysUntilDue - b.daysUntilDue);
   }, [views]);
 
-  if (!views) return null;
+  if (!views) return (
+    <div className="pb-20">
+      <header className="bg-gradient-to-br from-water-700 via-water-600 to-water-500 px-4 pt-5 pb-12 text-white">
+        <h1 className="text-xl font-bold">{TR.appName}</h1>
+        <p className="text-water-100 text-base font-medium mt-1">{getGreeting()}</p>
+      </header>
+      <div className="px-4 pt-6 space-y-3">
+        {[1, 2, 3].map(i => (
+          <div key={i} className="h-20 bg-gray-100 rounded-2xl animate-pulse" />
+        ))}
+      </div>
+    </div>
+  );
 
   const handleExport = async () => {
-    await exportBackup();
-    showToast(TR.backupSuccess);
+    try {
+      await exportBackup();
+      showToast(TR.backupSuccess);
+    } catch {
+      showToast(TR.backupFailed, 'error');
+    }
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -97,7 +113,7 @@ export default function DashboardPage() {
   return (
     <div className="pb-20">
       {/* Gradient Header */}
-      <header className="bg-gradient-to-br from-water-700 via-water-600 to-water-500 px-4 pt-5 pb-12 text-white">
+      <header className="bg-gradient-to-br from-water-700 via-water-600 to-water-500 px-4 pt-5 pb-12 text-white" style={{ paddingTop: 'max(1.25rem, env(safe-area-inset-top))' }}>
         <div className="flex items-center justify-between mb-1">
           <h1 className="text-xl font-bold">{TR.appName}</h1>
           <button
@@ -161,6 +177,8 @@ export default function DashboardPage() {
             {/* Alert Banner */}
             {overdueCount > 0 && (
               <div
+                role="button"
+                aria-label={TR.overdueAlert(overdueCount)}
                 onClick={() => navigate('/notifications')}
                 className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-center gap-3 cursor-pointer interactive-press animate-fade-in-up"
               >
@@ -187,6 +205,8 @@ export default function DashboardPage() {
                     return (
                       <div
                         key={view.customer.id}
+                        role="button"
+                        aria-label={`${view.customer.name} - ${getDayLabel(view.daysUntilDue, view.effectiveDueDate)}`}
                         onClick={() => navigate(`/customers/${view.customer.id}`)}
                         className={`flex items-center gap-3 bg-white rounded-2xl p-3.5 shadow-sm border border-gray-100 cursor-pointer interactive-press animate-fade-in-up stagger-${Math.min(i + 3, 8)}`}
                       >
@@ -205,7 +225,7 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 <div className="bg-white rounded-2xl p-6 border border-gray-100 text-center">
-                  <p className="text-sm text-gray-400">{TR.noUpcomingThisWeek}</p>
+                  <p className="text-sm text-gray-500">{TR.noUpcomingThisWeek}</p>
                 </div>
               )}
             </section>
@@ -221,6 +241,8 @@ export default function DashboardPage() {
                   {recentRecords.map((record, i) => (
                     <div
                       key={record.id}
+                      role="button"
+                      aria-label={`${record.customerName} - ${MAINTENANCE_TYPE_LABELS[record.type]}`}
                       onClick={() => navigate(`/customers/${record.customerId}`)}
                       className={`flex items-center gap-3 bg-white rounded-2xl p-3.5 shadow-sm border border-gray-100 cursor-pointer interactive-press animate-fade-in-up stagger-${Math.min(i + 5, 8)}`}
                     >

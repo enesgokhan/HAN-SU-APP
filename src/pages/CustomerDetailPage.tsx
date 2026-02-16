@@ -4,12 +4,13 @@ import { Edit, Trash2, Phone, MapPin, Calendar, FileText, UserX, UserCheck } fro
 import { TR } from '../constants/tr';
 import { useCustomer, deleteCustomer, updateCustomer } from '../hooks/useCustomers';
 import { useMaintenanceRecords } from '../hooks/useMaintenance';
-import { useDashboard } from '../hooks/useDashboard';
+import { useCustomerView } from '../hooks/useDashboard';
 import PageHeader from '../components/layout/PageHeader';
 import MaintenanceHistory from '../components/maintenance/MaintenanceHistory';
 import AddMaintenanceForm from '../components/maintenance/AddMaintenanceForm';
 import SnoozeActions from '../components/dashboard/SnoozeActions';
 import ConfirmDialog from '../components/shared/ConfirmDialog';
+import EmptyState from '../components/shared/EmptyState';
 import { showToast } from '../components/shared/Toast';
 import { formatDateTr } from '../utils/dates';
 import { STATUS_CONFIG, STATUS_LABELS } from '../utils/status';
@@ -19,12 +20,32 @@ export default function CustomerDetailPage() {
   const navigate = useNavigate();
   const customer = useCustomer(id);
   const records = useMaintenanceRecords(id);
-  const allViews = useDashboard('', true);
+  const view = useCustomerView(id);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  if (!customer || !records || !allViews) return null;
+  // Loading skeleton
+  if (customer === undefined || records === undefined || view === undefined) {
+    return (
+      <div className="pb-20">
+        <PageHeader title="" showBack />
+        <div className="px-4 py-4 space-y-4">
+          <div className="h-32 bg-gray-100 rounded-xl animate-pulse" />
+          <div className="h-24 bg-gray-100 rounded-xl animate-pulse" />
+          <div className="h-16 bg-gray-100 rounded-xl animate-pulse" />
+        </div>
+      </div>
+    );
+  }
 
-  const view = allViews.find(v => v.customer.id === id);
+  // Not found
+  if (customer === null || !customer) {
+    return (
+      <div className="pb-20">
+        <PageHeader title="" showBack />
+        <EmptyState title={TR.searchNotFound} />
+      </div>
+    );
+  }
 
   const isActive = customer.active !== false;
 
@@ -83,7 +104,7 @@ export default function CustomerDetailPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-2">
           <div className="flex items-center gap-2 text-sm text-gray-700">
             <Phone size={16} className="text-gray-400" />
-            <a href={`tel:${customer.phone.replace(/[^\d+]/g, '')}`} className="underline">{customer.phone}</a>
+            <a href={`tel:${customer.phone.replace(/[^\d+]/g, '')}`} className="underline" aria-label={`${customer.name} ara`}>{customer.phone}</a>
           </div>
           {customer.address && (
             <div className="flex items-start gap-2 text-sm text-gray-700">

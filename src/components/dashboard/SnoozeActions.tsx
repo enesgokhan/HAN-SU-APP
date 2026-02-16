@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Clock } from 'lucide-react';
 import { TR } from '../../constants/tr';
-import { snoozeOneMonth, snoozeTwoMonths, snoozeToDate } from '../../hooks/useReminders';
+import { snoozeOneMonth, snoozeTwoMonths, snoozeToDate } from '../../utils/reminders';
 import { showToast } from '../shared/Toast';
 import { todayISO } from '../../utils/dates';
 
@@ -21,6 +21,8 @@ export default function SnoozeActions({ customerId, originalDueDate }: SnoozeAct
     try {
       await action();
       showToast(TR.snoozedUntil(label));
+    } catch {
+      showToast(TR.snoozeFailed, 'error');
     } finally {
       setLoading(false);
     }
@@ -34,6 +36,8 @@ export default function SnoozeActions({ customerId, originalDueDate }: SnoozeAct
       setShowDatePicker(false);
       setCustomDate('');
       showToast(TR.snoozedUntil(customDate));
+    } catch {
+      showToast(TR.snoozeFailed, 'error');
     } finally {
       setLoading(false);
     }

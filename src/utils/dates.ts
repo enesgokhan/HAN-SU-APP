@@ -17,7 +17,10 @@ export function getEffectiveDueDate(
   activeSnooze: ReminderOverride | null
 ): string {
   if (activeSnooze) {
-    return activeSnooze.snoozedUntil;
+    const snoozedDate = startOfDay(parseISO(activeSnooze.snoozedUntil));
+    if (snoozedDate >= startOfDay(new Date())) {
+      return activeSnooze.snoozedUntil;
+    }
   }
   return nextDueDate;
 }

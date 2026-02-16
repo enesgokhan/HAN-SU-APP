@@ -37,6 +37,25 @@ export default function CustomerListPage() {
     { key: 'maintenance', label: TR.sortByLastMaintenance },
   ];
 
+  // Loading skeleton
+  if (!views) return (
+    <div className="pb-20">
+      <PageHeader
+        title={TR.navCustomers}
+        right={
+          <button className="w-11 h-11 flex items-center justify-center rounded-xl">
+            <Plus size={22} className="text-water-600" />
+          </button>
+        }
+      />
+      <div className="px-4 pt-4 space-y-3">
+        {[1, 2, 3, 4].map(i => (
+          <div key={i} className="h-20 bg-gray-100 rounded-2xl animate-pulse" />
+        ))}
+      </div>
+    </div>
+  );
+
   const filtered = useMemo(() => {
     if (!views) return [];
     let result = views.filter(v => {

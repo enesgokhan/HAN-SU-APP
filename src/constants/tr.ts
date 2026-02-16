@@ -122,13 +122,20 @@ export const TR = {
   noUpcomingThisWeek: 'Bu hafta planlanmış bakım yok',
   activeCustomers: 'Aktif',
 
+  // Error handling
+  errorTitle: 'Bir hata oluştu',
+  errorDescription: 'Uygulama beklenmeyen bir hata ile karşılaştı.',
+  errorReload: 'Anasayfaya Dön',
+  snoozeFailed: 'Erteleme başarısız',
+  backupFailed: 'Yedekleme başarısız',
+
   // General
   noCustomers: 'Henüz müşteri eklenmemiş',
   noCustomersDesc: 'İlk müşterinizi ekleyerek başlayın',
   required: 'Bu alan zorunludur',
 } as const;
 
-export const MAINTENANCE_TYPE_LABELS: Record<string, string> = {
+export const MAINTENANCE_TYPE_LABELS: Record<import('../types').MaintenanceType, string> = {
   filter_replacement: TR.filterReplacement,
   membrane_replacement: TR.membraneReplacement,
   general_maintenance: TR.generalMaintenance,

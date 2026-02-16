@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { TR } from '../constants/tr';
 import { useCustomer, addCustomer, updateCustomer } from '../hooks/useCustomers';
@@ -14,6 +14,7 @@ export default function CustomerFormPage() {
   const isEdit = Boolean(id);
   const navigate = useNavigate();
   const existing = useCustomer(id);
+  const initialized = useRef(false);
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -24,13 +25,14 @@ export default function CustomerFormPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (existing) {
+    if (existing && !initialized.current) {
       setName(existing.name);
       setPhone(existing.phone);
       setAddress(existing.address);
       setInstallationDate(existing.installationDate);
       setNotes(existing.notes);
       setMaintenanceCycleMonths(existing.maintenanceCycleMonths ?? 6);
+      initialized.current = true;
     }
   }, [existing]);
 
@@ -69,8 +71,7 @@ export default function CustomerFormPage() {
       }
       showToast(TR.customerSaved);
       navigate(-1);
-    } catch (err) {
-      console.error('Failed to save customer:', err);
+    } catch {
       showToast(TR.customerSaveFailed, 'error');
     } finally {
       setSaving(false);
@@ -90,6 +91,7 @@ export default function CustomerFormPage() {
             value={name}
             onChange={e => setName(e.target.value)}
             required
+            maxLength={200}
             autoComplete="name"
             className={inputClass}
           />
@@ -101,6 +103,7 @@ export default function CustomerFormPage() {
             value={phone}
             onChange={e => setPhone(e.target.value)}
             required
+            maxLength={30}
             autoComplete="tel"
             inputMode="tel"
             className={inputClass}
@@ -112,6 +115,7 @@ export default function CustomerFormPage() {
             value={address}
             onChange={e => setAddress(e.target.value)}
             rows={2}
+            maxLength={500}
             autoComplete="street-address"
             className={`${inputClass} resize-none`}
           />
@@ -122,6 +126,7 @@ export default function CustomerFormPage() {
             type="date"
             value={installationDate}
             onChange={e => setInstallationDate(e.target.value)}
+            min="2000-01-01"
             max={todayISO()}
             required
             className={inputClass}
@@ -145,6 +150,7 @@ export default function CustomerFormPage() {
             value={notes}
             onChange={e => setNotes(e.target.value)}
             rows={3}
+            maxLength={1000}
             className={`${inputClass} resize-none`}
           />
         </div>

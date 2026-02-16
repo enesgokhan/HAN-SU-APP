@@ -27,6 +27,10 @@ export default function ToastContainer() {
     return () => { addToastFn = null; };
   }, []);
 
+  const dismiss = (id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  };
+
   if (toasts.length === 0) return null;
 
   return (
@@ -34,7 +38,8 @@ export default function ToastContainer() {
       {toasts.map(toast => (
         <div
           key={toast.id}
-          className={`flex items-center gap-2 px-4 py-3 rounded-2xl shadow-xl text-sm font-medium pointer-events-auto toast-enter ${
+          onClick={() => dismiss(toast.id)}
+          className={`flex items-center gap-2 px-4 py-3 rounded-2xl shadow-xl text-sm font-medium pointer-events-auto cursor-pointer toast-enter ${
             toast.type === 'success'
               ? 'bg-green-600 text-white'
               : 'bg-red-600 text-white'

@@ -4,7 +4,7 @@ import { Phone, Calendar, CheckCircle, Clock, ChevronDown, ChevronUp } from 'luc
 import type { CustomerMaintenanceView } from '../../types';
 import { TR } from '../../constants/tr';
 import { formatDateShort } from '../../utils/dates';
-import { STATUS_CONFIG, STATUS_LABELS } from '../../utils/status';
+import { STATUS_CONFIG, STATUS_LABELS, formatDaysText } from '../../utils/status';
 import SnoozeActions from '../dashboard/SnoozeActions';
 
 interface NotificationCardProps {
@@ -18,21 +18,15 @@ export default function NotificationCard({ view, onMaintenanceDone }: Notificati
   const { customer, status, daysUntilDue, effectiveDueDate, nextDueDate } = view;
   const config = STATUS_CONFIG[status];
 
-  const daysText =
-    daysUntilDue === 0
-      ? TR.dueToday
-      : daysUntilDue < 0
-        ? TR.daysOverdue(daysUntilDue)
-        : TR.daysUntilDue(daysUntilDue);
-
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden interactive-press">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden interactive-press" role="article" aria-label={`${customer.name} - ${STATUS_LABELS[status]}`}>
       <div className="flex">
         <div className={`w-1 ${config.dot} shrink-0`} />
         <div className="flex-1 p-4">
           <div className="flex items-center justify-between mb-1.5">
             <h3
               className="font-semibold text-gray-900 truncate flex-1 cursor-pointer"
+              role="button"
               onClick={() => navigate(`/customers/${customer.id}`)}
             >
               {customer.name}
@@ -45,6 +39,7 @@ export default function NotificationCard({ view, onMaintenanceDone }: Notificati
           <a
             href={`tel:${customer.phone.replace(/[^\d+]/g, '')}`}
             className="inline-flex items-center gap-1.5 text-sm text-gray-500 active:text-water-600 mb-1"
+            aria-label={`${customer.name} ara`}
           >
             <Phone size={13} />
             {customer.phone}
@@ -53,20 +48,20 @@ export default function NotificationCard({ view, onMaintenanceDone }: Notificati
           <div className="flex items-center gap-2 mt-1">
             <Calendar size={13} className="text-gray-400" />
             <span className="text-xs text-gray-500">{formatDateShort(effectiveDueDate)}</span>
-            <span className={`text-xs font-semibold ${config.text}`}>{daysText}</span>
+            <span className={`text-xs font-semibold ${config.text}`}>{formatDaysText(daysUntilDue)}</span>
           </div>
 
           <div className="flex gap-2 mt-3">
             <button
               onClick={() => onMaintenanceDone(customer.id)}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-green-50 text-green-700 text-xs font-medium active:bg-green-100 transition-colors min-h-[36px]"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-green-50 text-green-700 text-xs font-medium active:bg-green-100 transition-colors min-h-[44px]"
             >
               <CheckCircle size={14} />
               {TR.maintenanceDone}
             </button>
             <button
               onClick={() => setExpanded(!expanded)}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gray-100 text-gray-600 text-xs font-medium active:bg-gray-200 transition-colors min-h-[36px]"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gray-100 text-gray-600 text-xs font-medium active:bg-gray-200 transition-colors min-h-[44px]"
             >
               <Clock size={14} />
               {TR.postpone}

@@ -33,7 +33,7 @@ export default function SortMenu({ options, activeKey, onChange }: SortMenuProps
       <button
         onClick={() => setOpen(!open)}
         aria-label={TR.sortLabel}
-        className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-gray-600 bg-gray-100 active:bg-gray-200 transition-colors min-h-[36px]"
+        className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-600 bg-gray-100 active:bg-gray-200 transition-colors min-h-[44px]"
       >
         <ArrowUpDown size={14} />
         {TR.sortLabel}

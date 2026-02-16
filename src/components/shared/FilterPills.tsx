@@ -19,7 +19,7 @@ export default function FilterPills({ options, activeKey, onChange }: FilterPill
           <button
             key={opt.key}
             onClick={() => onChange(opt.key)}
-            className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 min-h-[36px] ${
+            className={`shrink-0 px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-200 min-h-[44px] ${
               isActive
                 ? 'bg-water-600 text-white shadow-sm'
                 : 'bg-gray-100 text-gray-600 active:bg-gray-200'
@@ -27,7 +27,7 @@ export default function FilterPills({ options, activeKey, onChange }: FilterPill
           >
             {opt.label}
             {opt.count !== undefined && (
-              <span className={`ml-1 ${isActive ? 'text-water-200' : 'text-gray-400'}`}>
+              <span className={`ml-1 ${isActive ? 'text-white/70' : 'text-gray-500'}`}>
                 {opt.count}
               </span>
             )}
