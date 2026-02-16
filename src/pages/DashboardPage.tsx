@@ -1,6 +1,6 @@
 import { useRef, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Download, Upload, Settings, AlertTriangle, Users, CheckCircle2, ChevronRight, Calendar } from 'lucide-react';
+import { Plus, Download, Upload, Settings, AlertTriangle, Users, CheckCircle2, ChevronRight, Calendar, CalendarCheck } from 'lucide-react';
 import { TR, MAINTENANCE_TYPE_LABELS } from '../constants/tr';
 import { useDashboard } from '../hooks/useDashboard';
 import { useRecentMaintenance, useMonthlyMaintenanceCount } from '../hooks/useMaintenance';
@@ -10,6 +10,7 @@ import { showToast } from '../components/shared/Toast';
 import { exportBackup, importBackup } from '../utils/backup';
 import { getGreeting, formatTodayFull, formatDateWithDay, formatDateShort } from '../utils/dates';
 import { STATUS_CONFIG } from '../utils/status';
+import { useTodayPlans } from '../hooks/usePlans';
 
 export default function DashboardPage() {
   const [showSettings, setShowSettings] = useState(false);
@@ -20,6 +21,7 @@ export default function DashboardPage() {
   const views = useDashboard('');
   const recentRecords = useRecentMaintenance(5);
   const monthlyCount = useMonthlyMaintenanceCount();
+  const todayPlans = useTodayPlans();
 
   const overdueCount = useMemo(() =>
     views?.filter(v => v.status === 'overdue').length ?? 0,
@@ -190,6 +192,36 @@ export default function DashboardPage() {
                   <p className="text-xs text-red-600 mt-0.5">{TR.viewNow} →</p>
                 </div>
               </div>
+            )}
+
+            {/* Today's Appointments */}
+            {todayPlans && todayPlans.length > 0 && (
+              <section className="animate-fade-in-up stagger-1">
+                <div className="flex items-center gap-2 mb-3">
+                  <CalendarCheck size={18} className="text-water-600" />
+                  <h2 className="text-base font-bold text-gray-900">{TR.todayAppointments}</h2>
+                </div>
+                <div className="space-y-2">
+                  {todayPlans.map(plan => (
+                    <div
+                      key={plan.id}
+                      role="button"
+                      aria-label={`${plan.customerName} - ${TR.todayAppointments}`}
+                      onClick={() => navigate(`/customers/${plan.customerId}`)}
+                      className="flex items-center gap-3 bg-water-50 rounded-2xl p-3.5 shadow-sm border border-water-200 cursor-pointer interactive-press animate-fade-in-up"
+                    >
+                      <div className="w-8 h-8 bg-water-100 rounded-full flex items-center justify-center shrink-0">
+                        <CalendarCheck size={16} className="text-water-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-gray-900 text-sm truncate">{plan.customerName}</p>
+                        {plan.notes && <p className="text-xs text-gray-500 truncate">{plan.notes}</p>}
+                      </div>
+                      <ChevronRight size={16} className="text-gray-300 shrink-0" />
+                    </div>
+                  ))}
+                </div>
+              </section>
             )}
 
             {/* This Week */}

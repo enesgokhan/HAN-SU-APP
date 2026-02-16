@@ -43,9 +43,10 @@ export async function updateCustomer(id: string, data: Partial<Customer>) {
 }
 
 export async function deleteCustomer(id: string) {
-  await db.transaction('rw', db.customers, db.maintenanceRecords, db.reminderOverrides, async () => {
+  await db.transaction('rw', db.customers, db.maintenanceRecords, db.reminderOverrides, db.plans, async () => {
     await db.maintenanceRecords.where('customerId').equals(id).delete();
     await db.reminderOverrides.where('customerId').equals(id).delete();
+    await db.plans.where('customerId').equals(id).delete();
     await db.customers.delete(id);
   });
 }

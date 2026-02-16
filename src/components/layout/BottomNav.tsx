@@ -1,10 +1,12 @@
 import { NavLink } from 'react-router-dom';
-import { Home, Bell, Users } from 'lucide-react';
+import { Home, Bell, CalendarCheck, Users } from 'lucide-react';
 import { TR } from '../../constants/tr';
 import { useOverdueCount } from '../../hooks/useDashboard';
+import { useTodayPlanCount } from '../../hooks/usePlans';
 
 export default function BottomNav() {
   const overdueCount = useOverdueCount() ?? 0;
+  const todayPlans = useTodayPlanCount() ?? 0;
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
     `relative flex flex-col items-center justify-center gap-0.5 py-2 flex-1 text-xs font-medium transition-colors duration-200 min-h-[56px] ${
@@ -20,7 +22,7 @@ export default function BottomNav() {
         {({ isActive }) => (
           <>
             {isActive && <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-water-500 rounded-full" />}
-            <Home size={22} />
+            <Home size={20} />
             <span>{TR.navDashboard}</span>
           </>
         )}
@@ -34,7 +36,7 @@ export default function BottomNav() {
           <>
             {isActive && <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-water-500 rounded-full" />}
             <div className="relative">
-              <Bell size={22} />
+              <Bell size={20} />
               {overdueCount > 0 && (
                 <span className="absolute -top-1 -right-1.5 w-4 h-4 bg-red-500 rounded-full text-[10px] font-bold text-white flex items-center justify-center animate-pulse-dot">
                   {overdueCount > 9 ? '9+' : overdueCount}
@@ -45,11 +47,27 @@ export default function BottomNav() {
           </>
         )}
       </NavLink>
+      <NavLink to="/plans" className={linkClass}>
+        {({ isActive }) => (
+          <>
+            {isActive && <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-water-500 rounded-full" />}
+            <div className="relative">
+              <CalendarCheck size={20} />
+              {todayPlans > 0 && (
+                <span className="absolute -top-1 -right-1.5 w-4 h-4 bg-water-500 rounded-full text-[10px] font-bold text-white flex items-center justify-center">
+                  {todayPlans > 9 ? '9+' : todayPlans}
+                </span>
+              )}
+            </div>
+            <span>{TR.navPlans}</span>
+          </>
+        )}
+      </NavLink>
       <NavLink to="/customers" className={linkClass}>
         {({ isActive }) => (
           <>
             {isActive && <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-water-500 rounded-full" />}
-            <Users size={22} />
+            <Users size={20} />
             <span>{TR.navCustomers}</span>
           </>
         )}

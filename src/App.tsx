@@ -7,6 +7,7 @@ import NotificationsPage from './pages/NotificationsPage';
 import CustomerListPage from './pages/CustomerListPage';
 import CustomerFormPage from './pages/CustomerFormPage';
 import CustomerDetailPage from './pages/CustomerDetailPage';
+import PlansPage from './pages/PlansPage';
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<DashboardPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
+            <Route path="/plans" element={<PlansPage />} />
             <Route path="/customers" element={<CustomerListPage />} />
             <Route path="/customers/new" element={<CustomerFormPage />} />
             <Route path="/customers/:id" element={<CustomerDetailPage />} />

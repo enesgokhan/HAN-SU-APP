@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Edit, Trash2, Phone, MapPin, Calendar, FileText, UserX, UserCheck } from 'lucide-react';
+import { Edit, Trash2, Phone, MapPin, Calendar, FileText, UserX, UserCheck, CalendarCheck, Plus } from 'lucide-react';
 import { TR } from '../constants/tr';
 import { useCustomer, deleteCustomer, updateCustomer } from '../hooks/useCustomers';
 import { useMaintenanceRecords } from '../hooks/useMaintenance';
@@ -12,8 +12,10 @@ import SnoozeActions from '../components/dashboard/SnoozeActions';
 import ConfirmDialog from '../components/shared/ConfirmDialog';
 import EmptyState from '../components/shared/EmptyState';
 import { showToast } from '../components/shared/Toast';
-import { formatDateTr } from '../utils/dates';
+import { formatDateTr, formatDateShort, todayISO } from '../utils/dates';
 import { STATUS_CONFIG, STATUS_LABELS } from '../utils/status';
+import { useCustomerPlans } from '../hooks/usePlans';
+import AddPlanForm from '../components/plans/AddPlanForm';
 
 export default function CustomerDetailPage() {
   const { id } = useParams();
@@ -21,7 +23,9 @@ export default function CustomerDetailPage() {
   const customer = useCustomer(id);
   const records = useMaintenanceRecords(id);
   const view = useCustomerView(id);
+  const plans = useCustomerPlans(id);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showAddPlan, setShowAddPlan] = useState(false);
 
   // Loading skeleton
   if (customer === undefined || records === undefined || view === undefined) {
@@ -158,6 +162,43 @@ export default function CustomerDetailPage() {
           </div>
         )}
 
+        {/* Scheduled Plans */}
+        {(() => {
+          const scheduled = plans?.filter(p => p.status === 'scheduled') ?? [];
+          return (
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-semibold text-gray-700">{TR.navPlans}</h3>
+                <button
+                  onClick={() => setShowAddPlan(true)}
+                  className="flex items-center gap-1 text-xs font-medium text-water-600 active:text-water-700 min-h-[36px]"
+                >
+                  <Plus size={14} />
+                  {TR.addPlan}
+                </button>
+              </div>
+              {scheduled.length > 0 ? (
+                <div className="space-y-2">
+                  {scheduled.map(plan => (
+                    <div key={plan.id} className="flex items-center gap-3 bg-water-50 rounded-xl p-3 border border-water-200">
+                      <CalendarCheck size={16} className="text-water-600 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900">{formatDateShort(plan.date)}</p>
+                        {plan.notes && <p className="text-xs text-gray-500 truncate">{plan.notes}</p>}
+                      </div>
+                      <span className={`text-xs font-medium ${plan.date < todayISO() ? 'text-red-500' : 'text-water-600'}`}>
+                        {plan.date < todayISO() ? TR.overdueAppointment : plan.date === todayISO() ? TR.today : formatDateShort(plan.date)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-400 text-center py-3">{TR.noPlans}</p>
+              )}
+            </div>
+          );
+        })()}
+
         {/* Add maintenance */}
         <AddMaintenanceForm customerId={customer.id} />
 
@@ -176,6 +217,12 @@ export default function CustomerDetailPage() {
         confirmDestructive
         onConfirm={handleDelete}
         onCancel={() => setShowDeleteConfirm(false)}
+      />
+
+      <AddPlanForm
+        open={showAddPlan}
+        onClose={() => setShowAddPlan(false)}
+        preselectedCustomerId={customer.id}
       />
     </div>
   );

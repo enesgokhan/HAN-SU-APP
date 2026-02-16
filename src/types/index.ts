@@ -36,12 +36,26 @@ export interface ReminderOverride {
   createdAt: string;
 }
 
+export type PlanStatus = 'scheduled' | 'completed' | 'cancelled';
+
+export interface Plan {
+  id: string;
+  customerId: string;
+  date: string;
+  notes: string;
+  status: PlanStatus;
+  maintenanceRecordId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface BackupData {
-  version: 1;
+  version: 1 | 2;
   exportedAt: string;
   customers: Customer[];
   maintenanceRecords: MaintenanceRecord[];
   reminderOverrides: ReminderOverride[];
+  plans?: Plan[];
 }
 
 export type MaintenanceStatus = 'overdue' | 'due_soon' | 'upcoming' | 'ok';

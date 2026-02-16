@@ -129,6 +129,28 @@ export const TR = {
   snoozeFailed: 'Erteleme başarısız',
   backupFailed: 'Yedekleme başarısız',
 
+  // Plans / Appointments
+  navPlans: 'Randevular',
+  addPlan: 'Yeni Randevu',
+  planDate: 'Randevu Tarihi',
+  planNotes: 'Notlar',
+  planSaved: 'Randevu kaydedildi',
+  planSaveFailed: 'Randevu kaydedilemedi',
+  planCompleted: 'Bakım kaydı eklendi',
+  planPostponed: 'Randevu ertelendi',
+  planCancelled: 'Randevu iptal edildi',
+  selectCustomer: 'Müşteri Seçin',
+  noPlans: 'Henüz randevu yok',
+  noPlansDesc: 'Müşterilerinizle anlaştığınız randevuları buradan takip edin',
+  confirmCancelPlan: 'Bu randevuyu iptal etmek istediğinize emin misiniz?',
+  todayAppointments: 'Bugünkü Randevular',
+  scheduledFilter: 'Planlanmış',
+  completedFilter: 'Tamamlanan',
+  cancelledFilter: 'İptal',
+  markAsDone: 'Yapıldı',
+  cancelPlan: 'İptal Et',
+  overdueAppointment: 'Geçmiş',
+
   // General
   noCustomers: 'Henüz müşteri eklenmemiş',
   noCustomersDesc: 'İlk müşterinizi ekleyerek başlayın',

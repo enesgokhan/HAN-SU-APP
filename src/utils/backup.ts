@@ -1,5 +1,7 @@
 import { db } from '../db/database';
-import type { BackupData, MaintenanceType } from '../types';
+import type { BackupData, MaintenanceType, PlanStatus } from '../types';
+
+const VALID_PLAN_STATUSES: PlanStatus[] = ['scheduled', 'completed', 'cancelled'];
 
 const MAX_BACKUP_SIZE = 50 * 1024 * 1024; // 50 MB
 const MAX_RECORDS = 10000;
@@ -10,11 +12,12 @@ const isValidDate = (v: string) => /^\d{4}-\d{2}-\d{2}/.test(v);
 
 export async function exportBackup(): Promise<void> {
   const data: BackupData = {
-    version: 1,
+    version: 2,
     exportedAt: new Date().toISOString(),
     customers: await db.customers.toArray(),
     maintenanceRecords: await db.maintenanceRecords.toArray(),
     reminderOverrides: await db.reminderOverrides.toArray(),
+    plans: await db.plans.toArray(),
   };
 
   const json = JSON.stringify(data, null, 2);
@@ -54,7 +57,7 @@ export async function importBackup(file: File): Promise<{ success: boolean; erro
       return { success: false, error: 'Geçersiz yedek dosyası formatı' };
     }
 
-    if (raw.version !== 1) {
+    if (raw.version !== 1 && raw.version !== 2) {
       return { success: false, error: `Desteklenmeyen versiyon: ${raw.version}` };
     }
 
@@ -135,14 +138,39 @@ export async function importBackup(file: File): Promise<{ success: boolean; erro
       createdAt: isString(r.createdAt) ? r.createdAt : new Date().toISOString(),
     }));
 
-    await db.transaction('rw', db.customers, db.maintenanceRecords, db.reminderOverrides, async () => {
+    // Validate plans if present (version 2)
+    const rawPlans = Array.isArray(raw.plans) ? raw.plans : [];
+    if (rawPlans.length > MAX_RECORDS) {
+      return { success: false, error: 'Yedek dosyası çok fazla kayıt içeriyor' };
+    }
+
+    const plans = rawPlans
+      .filter((p: Record<string, unknown>) =>
+        isString(p.id) && isString(p.customerId) && isString(p.date) &&
+        isString(p.status) && VALID_PLAN_STATUSES.includes(p.status as PlanStatus) &&
+        customerIds.has(p.customerId as string)
+      )
+      .map((p: Record<string, unknown>) => ({
+        id: p.id as string,
+        customerId: p.customerId as string,
+        date: p.date as string,
+        notes: isString(p.notes) ? p.notes : '',
+        status: p.status as PlanStatus,
+        maintenanceRecordId: isString(p.maintenanceRecordId) ? p.maintenanceRecordId : undefined,
+        createdAt: isString(p.createdAt) ? p.createdAt : new Date().toISOString(),
+        updatedAt: isString(p.updatedAt) ? p.updatedAt : new Date().toISOString(),
+      }));
+
+    await db.transaction('rw', db.customers, db.maintenanceRecords, db.reminderOverrides, db.plans, async () => {
       await db.customers.clear();
       await db.maintenanceRecords.clear();
       await db.reminderOverrides.clear();
+      await db.plans.clear();
 
       await db.customers.bulkAdd(customers);
       await db.maintenanceRecords.bulkAdd(maintenanceRecords);
       await db.reminderOverrides.bulkAdd(overrides);
+      await db.plans.bulkAdd(plans);
     });
 
     return { success: true };
