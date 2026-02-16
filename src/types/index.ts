@@ -5,6 +5,8 @@ export interface Customer {
   address: string;
   installationDate: string;
   notes: string;
+  maintenanceCycleMonths?: number;
+  active?: boolean;
   createdAt: string;
   updatedAt: string;
 }

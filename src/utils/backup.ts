@@ -12,11 +12,20 @@ export async function exportBackup(): Promise<void> {
 
   const json = JSON.stringify(data, null, 2);
   const blob = new Blob([json], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
+  const fileName = `han-aritma-yedek-${new Date().toISOString().split('T')[0]}.json`;
+  const file = new File([blob], fileName, { type: 'application/json' });
 
+  // Use Web Share API on mobile (works in iOS standalone PWA)
+  if (navigator.canShare?.({ files: [file] })) {
+    await navigator.share({ files: [file], title: 'HAN Arıtma Yedek' });
+    return;
+  }
+
+  // Fallback: standard download link
+  const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `han-aritma-yedek-${new Date().toISOString().split('T')[0]}.json`;
+  a.download = fileName;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -57,6 +66,10 @@ export async function importBackup(file: File): Promise<{ success: boolean; erro
     const overrides = data.reminderOverrides ?? [];
     if (overrides.some(r => !r.id || !r.customerId || !r.snoozedUntil)) {
       return { success: false, error: 'Yedek dosyasında bozuk hatırlatma verisi var' };
+    }
+
+    if (overrides.some(r => !customerIds.has(r.customerId))) {
+      return { success: false, error: 'Hatırlatma kayıtlarında bilinmeyen müşteri referansı var' };
     }
 
     await db.transaction('rw', db.customers, db.maintenanceRecords, db.reminderOverrides, async () => {

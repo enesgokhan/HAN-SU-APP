@@ -3,6 +3,7 @@ import { Clock } from 'lucide-react';
 import { TR } from '../../constants/tr';
 import { snoozeOneMonth, snoozeTwoMonths, snoozeToDate } from '../../hooks/useReminders';
 import { showToast } from '../shared/Toast';
+import { todayISO } from '../../utils/dates';
 
 interface SnoozeActionsProps {
   customerId: string;
@@ -74,7 +75,8 @@ export default function SnoozeActions({ customerId, originalDueDate }: SnoozeAct
             type="date"
             value={customDate}
             onChange={e => setCustomDate(e.target.value)}
-            className="flex-1 px-3 py-2.5 text-sm rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-water-500 min-h-[44px]"
+            min={todayISO()}
+            className="flex-1 px-3 py-2.5 text-base rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-water-500 min-h-[44px]"
           />
           <button
             onClick={handleCustomSnooze}

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Edit, Trash2, Phone, MapPin, Calendar, FileText } from 'lucide-react';
+import { Edit, Trash2, Phone, MapPin, Calendar, FileText, UserX, UserCheck } from 'lucide-react';
 import { TR } from '../constants/tr';
-import { useCustomer, deleteCustomer } from '../hooks/useCustomers';
+import { useCustomer, deleteCustomer, updateCustomer } from '../hooks/useCustomers';
 import { useMaintenanceRecords } from '../hooks/useMaintenance';
 import { useDashboard } from '../hooks/useDashboard';
 import PageHeader from '../components/layout/PageHeader';
@@ -12,31 +12,31 @@ import SnoozeActions from '../components/dashboard/SnoozeActions';
 import ConfirmDialog from '../components/shared/ConfirmDialog';
 import { showToast } from '../components/shared/Toast';
 import { formatDateTr } from '../utils/dates';
-import { STATUS_CONFIG } from '../utils/status';
-
-const STATUS_LABELS = {
-  overdue: TR.overdue,
-  due_soon: TR.dueSoon,
-  upcoming: TR.upcoming,
-  ok: TR.ok,
-};
+import { STATUS_CONFIG, STATUS_LABELS } from '../utils/status';
 
 export default function CustomerDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const customer = useCustomer(id);
   const records = useMaintenanceRecords(id);
-  const allViews = useDashboard('');
+  const allViews = useDashboard('', true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   if (!customer || !records || !allViews) return null;
 
   const view = allViews.find(v => v.customer.id === id);
 
+  const isActive = customer.active !== false;
+
   const handleDelete = async () => {
     await deleteCustomer(customer.id);
     showToast(TR.customerDeleted);
     navigate('/customers', { replace: true });
+  };
+
+  const handleToggleActive = async () => {
+    await updateCustomer(customer.id, { active: !isActive });
+    showToast(isActive ? TR.customerDeactivated : TR.customerActivated);
   };
 
   return (
@@ -48,12 +48,14 @@ export default function CustomerDetailPage() {
           <div className="flex gap-0.5">
             <button
               onClick={() => navigate(`/customers/${id}/edit`)}
+              aria-label="Düzenle"
               className="w-11 h-11 flex items-center justify-center rounded-xl active:bg-gray-100"
             >
               <Edit size={20} className="text-gray-600" />
             </button>
             <button
               onClick={() => setShowDeleteConfirm(true)}
+              aria-label="Sil"
               className="w-11 h-11 flex items-center justify-center rounded-xl active:bg-red-50"
             >
               <Trash2 size={20} className="text-red-500" />
@@ -63,6 +65,20 @@ export default function CustomerDetailPage() {
       />
 
       <div className="px-4 py-4 space-y-4">
+        {/* Inactive banner */}
+        {!isActive && (
+          <div className="flex items-center justify-between bg-gray-100 rounded-xl px-4 py-3">
+            <span className="text-sm font-medium text-gray-500">{TR.inactiveFilter}</span>
+            <button
+              onClick={handleToggleActive}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium bg-water-600 text-white active:bg-water-700 min-h-[36px]"
+            >
+              <UserCheck size={14} />
+              {TR.markActive}
+            </button>
+          </div>
+        )}
+
         {/* Customer info */}
         <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-2">
           <div className="flex items-center gap-2 text-sm text-gray-700">
@@ -86,6 +102,17 @@ export default function CustomerDetailPage() {
             </div>
           )}
         </div>
+
+        {/* Active/Inactive toggle */}
+        {isActive && (
+          <button
+            onClick={handleToggleActive}
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium bg-gray-100 text-gray-600 active:bg-gray-200 min-h-[44px]"
+          >
+            <UserX size={16} />
+            {TR.markInactive}
+          </button>
+        )}
 
         {/* Maintenance status */}
         {view && (

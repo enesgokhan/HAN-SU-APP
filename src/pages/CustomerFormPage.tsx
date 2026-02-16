@@ -6,7 +6,8 @@ import PageHeader from '../components/layout/PageHeader';
 import { showToast } from '../components/shared/Toast';
 import { todayISO } from '../utils/dates';
 
-const PHONE_REGEX = /^[\d\s\-()+ ]+$/;
+const PHONE_REGEX = /^[\d\s\-()+]+$/;
+const MIN_PHONE_DIGITS = 7;
 
 export default function CustomerFormPage() {
   const { id } = useParams();
@@ -19,6 +20,7 @@ export default function CustomerFormPage() {
   const [address, setAddress] = useState('');
   const [installationDate, setInstallationDate] = useState(todayISO());
   const [notes, setNotes] = useState('');
+  const [maintenanceCycleMonths, setMaintenanceCycleMonths] = useState(6);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -28,6 +30,7 @@ export default function CustomerFormPage() {
       setAddress(existing.address);
       setInstallationDate(existing.installationDate);
       setNotes(existing.notes);
+      setMaintenanceCycleMonths(existing.maintenanceCycleMonths ?? 6);
     }
   }, [existing]);
 
@@ -39,12 +42,12 @@ export default function CustomerFormPage() {
     const trimmedPhone = phone.trim();
 
     if (!trimmedName) {
-      showToast('Ad soyad boş bırakılamaz', 'error');
+      showToast(TR.nameRequired, 'error');
       return;
     }
 
-    if (!trimmedPhone || !PHONE_REGEX.test(trimmedPhone)) {
-      showToast('Geçerli bir telefon numarası girin', 'error');
+    if (!trimmedPhone || !PHONE_REGEX.test(trimmedPhone) || trimmedPhone.replace(/\D/g, '').length < MIN_PHONE_DIGITS) {
+      showToast(TR.invalidPhone, 'error');
       return;
     }
 
@@ -54,6 +57,7 @@ export default function CustomerFormPage() {
       address: address.trim(),
       installationDate,
       notes: notes.trim(),
+      maintenanceCycleMonths,
     };
 
     setSaving(true);
@@ -67,13 +71,13 @@ export default function CustomerFormPage() {
       navigate(-1);
     } catch (err) {
       console.error('Failed to save customer:', err);
-      showToast('Müşteri kaydedilemedi', 'error');
+      showToast(TR.customerSaveFailed, 'error');
     } finally {
       setSaving(false);
     }
   };
 
-  const inputClass = 'w-full px-3 py-2.5 rounded-xl border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-water-500 min-h-[44px]';
+  const inputClass = 'w-full px-3 py-2.5 rounded-xl border border-gray-300 text-base focus:outline-none focus:ring-2 focus:ring-water-500 min-h-[44px]';
 
   return (
     <div className="pb-20">
@@ -124,6 +128,18 @@ export default function CustomerFormPage() {
           />
         </div>
         <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{TR.maintenanceCycle}</label>
+          <select
+            value={maintenanceCycleMonths}
+            onChange={e => setMaintenanceCycleMonths(Number(e.target.value))}
+            className={`${inputClass} bg-white`}
+          >
+            <option value={3}>{TR.months3}</option>
+            <option value={6}>{TR.months6}</option>
+            <option value={12}>{TR.months12}</option>
+          </select>
+        </div>
+        <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">{TR.notes}</label>
           <textarea
             value={notes}
@@ -137,7 +153,7 @@ export default function CustomerFormPage() {
           disabled={saving}
           className="w-full py-3 rounded-xl bg-water-600 text-white font-medium text-sm active:bg-water-700 disabled:opacity-50 min-h-[48px]"
         >
-          {saving ? 'Kaydediliyor...' : TR.save}
+          {saving ? TR.saving : TR.save}
         </button>
       </form>
     </div>

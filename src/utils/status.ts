@@ -1,5 +1,6 @@
 import type { MaintenanceStatus } from '../types';
 import { DUE_SOON_DAYS, UPCOMING_DAYS } from '../constants/config';
+import { TR } from '../constants/tr';
 
 export function computeStatus(daysUntilDue: number): MaintenanceStatus {
   if (daysUntilDue < 0) return 'overdue';
@@ -38,3 +39,10 @@ export const STATUS_CONFIG = {
     dot: 'bg-green-500',
   },
 } as const;
+
+export const STATUS_LABELS: Record<MaintenanceStatus, string> = {
+  overdue: TR.overdue,
+  due_soon: TR.dueSoon,
+  upcoming: TR.upcoming,
+  ok: TR.ok,
+};

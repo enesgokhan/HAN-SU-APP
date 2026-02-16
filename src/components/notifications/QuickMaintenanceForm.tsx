@@ -33,13 +33,13 @@ export default function QuickMaintenanceForm({ customerId, customerName, open, o
       onClose();
     } catch (err) {
       console.error('Failed to add maintenance:', err);
-      showToast('Bakım kaydı eklenemedi', 'error');
+      showToast(TR.maintenanceSaveFailed, 'error');
     } finally {
       setSaving(false);
     }
   };
 
-  const inputClass = 'w-full px-3 py-2.5 rounded-xl border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-water-500 min-h-[44px]';
+  const inputClass = 'w-full px-3 py-2.5 rounded-xl border border-gray-300 text-base focus:outline-none focus:ring-2 focus:ring-water-500 min-h-[44px]';
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 animate-fade-in" onClick={onClose}>
@@ -72,7 +72,7 @@ export default function QuickMaintenanceForm({ customerId, customerName, open, o
               {TR.cancel}
             </button>
             <button type="submit" disabled={saving} className="flex-1 py-2.5 rounded-xl text-sm font-medium bg-green-600 text-white active:bg-green-700 disabled:opacity-50 min-h-[44px]">
-              {saving ? 'Kaydediliyor...' : TR.save}
+              {saving ? TR.saving : TR.save}
             </button>
           </div>
         </form>

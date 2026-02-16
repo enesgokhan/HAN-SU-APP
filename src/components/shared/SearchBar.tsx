@@ -21,7 +21,7 @@ export default function SearchBar({ value, onChange, variant = 'light' }: Search
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={TR.searchPlaceholder}
-        className={`w-full pl-10 pr-10 py-2.5 rounded-xl text-sm border-0 focus:outline-none focus:ring-2 ${
+        className={`w-full pl-10 pr-10 py-2.5 rounded-xl text-base border-0 focus:outline-none focus:ring-2 ${
           isDark
             ? 'bg-white/15 text-white placeholder-white/50 focus:ring-white/30'
             : 'bg-gray-100 text-gray-900 placeholder-gray-400 focus:ring-water-500'

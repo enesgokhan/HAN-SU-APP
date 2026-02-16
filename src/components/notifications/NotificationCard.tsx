@@ -4,15 +4,8 @@ import { Phone, Calendar, CheckCircle, Clock, ChevronDown, ChevronUp } from 'luc
 import type { CustomerMaintenanceView } from '../../types';
 import { TR } from '../../constants/tr';
 import { formatDateShort } from '../../utils/dates';
-import { STATUS_CONFIG } from '../../utils/status';
+import { STATUS_CONFIG, STATUS_LABELS } from '../../utils/status';
 import SnoozeActions from '../dashboard/SnoozeActions';
-
-const STATUS_LABELS = {
-  overdue: TR.overdue,
-  due_soon: TR.dueSoon,
-  upcoming: TR.upcoming,
-  ok: TR.ok,
-};
 
 interface NotificationCardProps {
   view: CustomerMaintenanceView;

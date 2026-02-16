@@ -5,10 +5,11 @@ import type { ReminderOverride } from '../types';
 
 export function getNextDueDate(
   installationDate: string,
-  lastMaintenanceDate: string | null
+  lastMaintenanceDate: string | null,
+  cycleMonths?: number
 ): string {
   const baseDate = lastMaintenanceDate ?? installationDate;
-  return format(addMonths(parseISO(baseDate), MAINTENANCE_CYCLE_MONTHS), 'yyyy-MM-dd');
+  return format(addMonths(parseISO(baseDate), cycleMonths ?? MAINTENANCE_CYCLE_MONTHS), 'yyyy-MM-dd');
 }
 
 export function getEffectiveDueDate(

@@ -6,9 +6,13 @@ import { computeStatus } from '../utils/status';
 
 const STATUS_PRIORITY = { overdue: 0, due_soon: 1, upcoming: 2, ok: 3 } as const;
 
-export function useDashboard(searchQuery: string) {
+export function useDashboard(searchQuery: string, includeInactive = false) {
   return useLiveQuery(async () => {
     let customers = await db.customers.toArray();
+
+    if (!includeInactive) {
+      customers = customers.filter(c => c.active !== false);
+    }
 
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
@@ -29,7 +33,7 @@ export function useDashboard(searchQuery: string) {
 
         const lastRecord = records.length > 0 ? records[records.length - 1] : null;
         const lastMaintenanceDate = lastRecord?.date ?? null;
-        const nextDueDate = getNextDueDate(customer.installationDate, lastMaintenanceDate);
+        const nextDueDate = getNextDueDate(customer.installationDate, lastMaintenanceDate, customer.maintenanceCycleMonths);
 
         const overrides = await db.reminderOverrides
           .where('customerId')
@@ -61,5 +65,5 @@ export function useDashboard(searchQuery: string) {
     });
 
     return views;
-  }, [searchQuery]);
+  }, [searchQuery, includeInactive]);
 }

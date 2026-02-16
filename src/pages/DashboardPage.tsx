@@ -57,6 +57,7 @@ export default function DashboardPage() {
           </div>
           <button
             onClick={() => setShowSettings(!showSettings)}
+            aria-label="Ayarlar"
             className="w-11 h-11 flex items-center justify-center rounded-xl active:bg-white/20"
           >
             <Settings size={20} />
@@ -66,6 +67,8 @@ export default function DashboardPage() {
 
       {/* Settings dropdown */}
       {showSettings && (
+        <>
+        <div className="fixed inset-0 z-10" onClick={() => setShowSettings(false)} />
         <div className="mx-4 -mt-4 mb-2 bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden relative z-20">
           <button
             onClick={handleExport}
@@ -82,6 +85,7 @@ export default function DashboardPage() {
             {TR.restore}
           </button>
         </div>
+        </>
       )}
       <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleFileSelect} />
 
@@ -112,6 +116,7 @@ export default function DashboardPage() {
       {/* FAB */}
       <button
         onClick={() => navigate('/customers/new')}
+        aria-label="Yeni müşteri ekle"
         className="fixed bottom-20 right-4 w-14 h-14 rounded-full bg-gradient-to-br from-water-500 to-water-700 text-white shadow-lg shadow-water-500/30 flex items-center justify-center active:scale-95 transition-transform z-30"
       >
         <Plus size={24} />

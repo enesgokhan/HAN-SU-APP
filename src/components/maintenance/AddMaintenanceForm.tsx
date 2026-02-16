@@ -30,7 +30,7 @@ export default function AddMaintenanceForm({ customerId }: AddMaintenanceFormPro
       setOpen(false);
     } catch (err) {
       console.error('Failed to add maintenance:', err);
-      showToast('Bakım kaydı eklenemedi', 'error');
+      showToast(TR.maintenanceSaveFailed, 'error');
     } finally {
       setSaving(false);
     }
@@ -48,7 +48,7 @@ export default function AddMaintenanceForm({ customerId }: AddMaintenanceFormPro
     );
   }
 
-  const inputClass = 'w-full px-3 py-2.5 rounded-xl border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-water-500 min-h-[44px]';
+  const inputClass = 'w-full px-3 py-2.5 rounded-xl border border-gray-300 text-base focus:outline-none focus:ring-2 focus:ring-water-500 min-h-[44px]';
 
   return (
     <form onSubmit={handleSubmit} className="bg-water-50 rounded-xl p-4 space-y-3 border border-water-200">
@@ -97,7 +97,7 @@ export default function AddMaintenanceForm({ customerId }: AddMaintenanceFormPro
           disabled={saving}
           className="flex-1 py-2.5 rounded-xl text-sm font-medium bg-water-600 text-white active:bg-water-700 disabled:opacity-50 min-h-[44px]"
         >
-          {saving ? 'Kaydediliyor...' : TR.save}
+          {saving ? TR.saving : TR.save}
         </button>
       </div>
     </form>

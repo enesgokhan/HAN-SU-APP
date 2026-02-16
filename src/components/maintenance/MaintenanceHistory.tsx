@@ -50,7 +50,7 @@ export default function MaintenanceHistory({ records }: MaintenanceHistoryProps)
       <ConfirmDialog
         open={deleteId !== null}
         title={TR.delete}
-        message="Bu bakım kaydını silmek istediğinize emin misiniz?"
+        message={TR.confirmDeleteMaintenance}
         confirmLabel={TR.delete}
         confirmDestructive
         onConfirm={async () => {

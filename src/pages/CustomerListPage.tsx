@@ -15,17 +15,21 @@ export default function CustomerListPage() {
   const [filter, setFilter] = useState('all');
   const [sort, setSort] = useState('name');
   const navigate = useNavigate();
-  const views = useDashboard(search);
+  const includeInactive = filter === 'inactive';
+  const views = useDashboard(search, includeInactive);
 
   const filterOptions = useMemo(() => {
     if (!views) return [];
+    const active = views.filter(v => v.customer.active !== false);
+    const inactive = views.filter(v => v.customer.active === false);
     return [
-      { key: 'all', label: TR.allFilter, count: views.length },
-      { key: 'overdue', label: TR.overdueFilter, count: views.filter(v => v.status === 'overdue').length },
-      { key: 'due_soon', label: TR.dueSoonFilter, count: views.filter(v => v.status === 'due_soon').length },
-      { key: 'ok', label: TR.normalFilter, count: views.filter(v => v.status === 'ok' || v.status === 'upcoming').length },
+      { key: 'all', label: TR.allFilter, count: includeInactive ? active.length : views.length },
+      { key: 'overdue', label: TR.overdueFilter, count: active.filter(v => v.status === 'overdue').length },
+      { key: 'due_soon', label: TR.dueSoonFilter, count: active.filter(v => v.status === 'due_soon').length },
+      { key: 'ok', label: TR.normalFilter, count: active.filter(v => v.status === 'ok' || v.status === 'upcoming').length },
+      { key: 'inactive', label: TR.inactiveFilter, count: includeInactive ? inactive.length : 0 },
     ];
-  }, [views]);
+  }, [views, includeInactive]);
 
   const sortOptions = [
     { key: 'name', label: TR.sortByName },
@@ -37,10 +41,11 @@ export default function CustomerListPage() {
     if (!views) return [];
     let result = views.filter(v => {
       switch (filter) {
-        case 'overdue': return v.status === 'overdue';
-        case 'due_soon': return v.status === 'due_soon';
-        case 'ok': return v.status === 'ok' || v.status === 'upcoming';
-        default: return true;
+        case 'overdue': return v.status === 'overdue' && v.customer.active !== false;
+        case 'due_soon': return v.status === 'due_soon' && v.customer.active !== false;
+        case 'ok': return (v.status === 'ok' || v.status === 'upcoming') && v.customer.active !== false;
+        case 'inactive': return v.customer.active === false;
+        default: return v.customer.active !== false;
       }
     });
 
@@ -95,7 +100,7 @@ export default function CustomerListPage() {
         ) : views ? (
           <EmptyState
             title={search ? TR.searchNotFound : TR.noCustomers}
-            description={search ? `"${search}" için müşteri bulunamadı` : TR.noCustomersDesc}
+            description={search ? TR.searchNoResults(search) : TR.noCustomersDesc}
             action={
               !search && filter === 'all' ? (
                 <button

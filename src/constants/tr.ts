@@ -90,6 +90,28 @@ export const TR = {
   restoreError: 'Geri yükleme hatası',
   invalidBackupFile: 'Geçersiz yedek dosyası',
 
+  // Validation
+  nameRequired: 'Ad soyad boş bırakılamaz',
+  invalidPhone: 'Geçerli bir telefon numarası girin',
+  customerSaveFailed: 'Müşteri kaydedilemedi',
+  maintenanceSaveFailed: 'Bakım kaydı eklenemedi',
+  confirmDeleteMaintenance: 'Bu bakım kaydını silmek istediğinize emin misiniz?',
+  saving: 'Kaydediliyor...',
+  searchNoResults: (query: string) => `"${query}" için müşteri bulunamadı`,
+
+  // Maintenance cycle
+  maintenanceCycle: 'Bakım Periyodu',
+  months3: '3 Ay',
+  months6: '6 Ay',
+  months12: '12 Ay',
+
+  // Active/Inactive
+  markInactive: 'Pasif Yap',
+  markActive: 'Aktif Yap',
+  inactiveFilter: 'Pasif',
+  customerDeactivated: 'Müşteri pasif yapıldı',
+  customerActivated: 'Müşteri aktif yapıldı',
+
   // General
   noCustomers: 'Henüz müşteri eklenmemiş',
   noCustomersDesc: 'İlk müşterinizi ekleyerek başlayın',
