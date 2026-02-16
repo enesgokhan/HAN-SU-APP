@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+@theme {
+  --color-water-50: #f0f9ff;
+  --color-water-100: #e0f2fe;
+  --color-water-200: #bae6fd;
+  --color-water-300: #7dd3fc;
+  --color-water-400: #38bdf8;
+  --color-water-500: #0ea5e9;
+  --color-water-600: #0284c7;
+  --color-water-700: #0369a1;
+  --color-water-800: #075985;
+  --color-water-900: #0c4a6e;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background-color: #f8fafc;
+}
+
+/* === Animations === */
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modal-in {
+  from { opacity: 0; transform: scale(0.95) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* === Animation utilities === */
+
+.animate-fade-in-up { animation: fade-in-up 0.35s ease-out both; }
+.animate-scale-in { animation: scale-in 0.3s ease-out both; }
+.animate-fade-in { animation: fade-in 0.2s ease-out both; }
+.animate-modal-in { animation: modal-in 0.25s ease-out both; }
+.animate-pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+.toast-enter { animation: slide-down 0.25s ease-out; }
+
+/* Stagger delays */
+.stagger-1 { animation-delay: 0.04s; }
+.stagger-2 { animation-delay: 0.08s; }
+.stagger-3 { animation-delay: 0.12s; }
+.stagger-4 { animation-delay: 0.16s; }
+.stagger-5 { animation-delay: 0.20s; }
+.stagger-6 { animation-delay: 0.24s; }
+.stagger-7 { animation-delay: 0.28s; }
+.stagger-8 { animation-delay: 0.32s; }
+
+/* Smooth expand/collapse */
+.expand-collapse {
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, opacity 0.25s ease-out;
+}
+
+/* Card press interaction */
+.interactive-press {
+  transition: transform 0.1s ease-out;
+}
+.interactive-press:active {
+  transform: scale(0.98);
+}
+
+/* Hide scrollbar for filter pills */
+.scrollbar-none::-webkit-scrollbar { display: none; }
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
