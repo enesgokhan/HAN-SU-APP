@@ -112,6 +112,16 @@ export const TR = {
   customerDeactivated: 'Müşteri pasif yapıldı',
   customerActivated: 'Müşteri aktif yapıldı',
 
+  // Dashboard v3
+  thisWeek: 'Bu Hafta',
+  recentActivity: 'Son Aktiviteler',
+  today: 'Bugün',
+  tomorrow: 'Yarın',
+  viewNow: 'Şimdi Gör',
+  doneThisMonth: 'Bu Ay',
+  noUpcomingThisWeek: 'Bu hafta planlanmış bakım yok',
+  activeCustomers: 'Aktif',
+
   // General
   noCustomers: 'Henüz müşteri eklenmemiş',
   noCustomersDesc: 'İlk müşterinizi ekleyerek başlayın',

@@ -43,3 +43,18 @@ export function toISODate(date: Date): string {
 export function todayISO(): string {
   return toISODate(new Date());
 }
+
+export function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Günaydın';
+  if (hour < 18) return 'İyi günler';
+  return 'İyi akşamlar';
+}
+
+export function formatTodayFull(): string {
+  return format(new Date(), 'd MMMM yyyy, EEEE', { locale: tr });
+}
+
+export function formatDateWithDay(dateStr: string): string {
+  return format(parseISO(dateStr), 'd MMM, EEEE', { locale: tr });
+}
