@@ -151,6 +151,70 @@ export const TR = {
   cancelPlan: 'İptal Et',
   overdueAppointment: 'Geçmiş',
 
+  // Cost tracking
+  cost: 'Ücret',
+  costPlaceholder: '0',
+  monthlyRevenue: 'Bu Ay Gelir',
+  currencySymbol: '₺',
+
+  // CSV export
+  exportCSV: 'CSV İndir',
+  csvExported: 'CSV dosyası indirildi',
+  csvStatus: 'Durum',
+  csvNextMaintenance: 'Sonraki Bakım',
+  csvLastMaintenance: 'Son Bakım',
+  csvMaintenanceCycle: 'Bakım Periyodu',
+
+  // Calendar
+  calendarView: 'Takvim',
+  listView: 'Liste',
+  monthNames: ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'] as readonly string[],
+  dayNamesShort: ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'] as readonly string[],
+
+  // Multi-type maintenance cycles
+  maintenanceCycles: 'Bakım Periyotları',
+  months24: '24 Ay',
+  defaultCycle: 'Varsayılan',
+  perTypeDueDates: 'Bakım Takvimleri',
+
+  // Duplicate phone detection
+  duplicatePhoneTitle: 'Telefon Numarası Kayıtlı',
+  duplicatePhoneMessage: (name: string) => `Bu numara ${name} için zaten kayıtlı. İkinci cihaz olarak eklemek istiyor musunuz?`,
+  duplicatePhoneSave: 'Yine de Kaydet',
+
+  // Device
+  deviceModel: 'Cihaz Modeli',
+  deviceSerial: 'Seri Numarası',
+
+  // Service Form
+  serviceForm: 'Servis Formu',
+  serviceFormTitle: 'TEKNİK SERVİS FORMU',
+  companyName: 'HAN Arıtma',
+  companyInfo: 'Su Arıtma Sistemleri',
+  customerInfo: 'MÜŞTERİ BİLGİLERİ',
+  deviceInfo: 'CİHAZ BİLGİLERİ',
+  serviceInfo: 'SERVİS BİLGİLERİ',
+  waterQuality: 'SU KALİTESİ ÖLÇÜMLERİ',
+  tdsInput: 'TDS Giriş (ppm)',
+  tdsOutput: 'TDS Çıkış (ppm)',
+  partsReplaced: 'KULLANILAN MALZEMELER',
+  customerSignature: 'Müşteri İmzası',
+  technicianSignature: 'Teknisyen İmzası',
+  printForm: 'Yazdır / PDF',
+  formGenerated: 'Servis formu oluşturuldu',
+  formNo: 'Form No',
+  materialName: 'Malzeme / İşlem',
+  materialQty: 'Adet',
+  materialPrice: 'Birim Fiyat',
+  materialTotal: 'Tutar',
+  addRow: '+ Satır Ekle',
+  subtotal: 'Ara Toplam',
+  kdv: 'KDV',
+  grandTotal: 'Genel Toplam',
+  technicianNotes: 'TEKNİSYEN NOTLARI',
+  customerApproval: 'Yukarıda belirtilen işlemlerin yapıldığını onaylıyorum.',
+  retentionRate: 'Ret. Oranı (%)',
+
   // General
   noCustomers: 'Henüz müşteri eklenmemiş',
   noCustomersDesc: 'İlk müşterinizi ekleyerek başlayın',

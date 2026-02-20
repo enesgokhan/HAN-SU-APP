@@ -1,16 +1,18 @@
 import { useState } from 'react';
-import type { MaintenanceRecord } from '../../types';
+import type { Customer, MaintenanceRecord } from '../../types';
 import { TR, MAINTENANCE_TYPE_LABELS } from '../../constants/tr';
 import { formatDateShort } from '../../utils/dates';
-import { Wrench, Trash2 } from 'lucide-react';
+import { Wrench, Trash2, FileText } from 'lucide-react';
 import { deleteMaintenanceRecord } from '../../hooks/useMaintenance';
+import { generateServiceForm } from '../../utils/serviceForm';
 import ConfirmDialog from '../shared/ConfirmDialog';
 
 interface MaintenanceHistoryProps {
   records: MaintenanceRecord[];
+  customer?: Customer;
 }
 
-export default function MaintenanceHistory({ records }: MaintenanceHistoryProps) {
+export default function MaintenanceHistory({ records, customer }: MaintenanceHistoryProps) {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   if (records.length === 0) {
@@ -32,19 +34,35 @@ export default function MaintenanceHistory({ records }: MaintenanceHistoryProps)
                 <span className="text-sm font-medium text-gray-900">
                   {MAINTENANCE_TYPE_LABELS[record.type] ?? record.type}
                 </span>
-                <span className="text-xs text-gray-500">{formatDateShort(record.date)}</span>
+                <div className="flex items-center gap-2">
+                  {record.cost != null && record.cost > 0 && (
+                    <span className="text-xs font-medium text-green-600">₺{record.cost}</span>
+                  )}
+                  <span className="text-xs text-gray-500">{formatDateShort(record.date)}</span>
+                </div>
               </div>
               {record.notes && (
                 <p className="text-xs text-gray-500 mt-0.5">{record.notes}</p>
               )}
             </div>
-            <button
-              onClick={() => setDeleteId(record.id)}
-              aria-label="Bakımı sil"
-              className="w-11 h-11 flex items-center justify-center rounded-lg text-gray-400 active:text-red-500 active:bg-red-50"
-            >
-              <Trash2 size={16} />
-            </button>
+            <div className="flex">
+              {customer && (
+                <button
+                  onClick={() => generateServiceForm(customer, record)}
+                  aria-label={TR.serviceForm}
+                  className="w-10 h-10 flex items-center justify-center rounded-lg text-gray-400 active:text-water-600 active:bg-water-50"
+                >
+                  <FileText size={15} />
+                </button>
+              )}
+              <button
+                onClick={() => setDeleteId(record.id)}
+                aria-label="Bakımı sil"
+                className="w-10 h-10 flex items-center justify-center rounded-lg text-gray-400 active:text-red-500 active:bg-red-50"
+              >
+                <Trash2 size={15} />
+              </button>
+            </div>
           </div>
         ))}
       </div>

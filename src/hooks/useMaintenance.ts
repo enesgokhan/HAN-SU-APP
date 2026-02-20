@@ -21,6 +21,7 @@ export async function addMaintenanceRecord(data: {
   date: string;
   type: MaintenanceType;
   notes: string;
+  cost?: number;
 }) {
   await db.maintenanceRecords.add({
     ...data,
@@ -63,5 +64,20 @@ export function useMonthlyMaintenanceCount() {
       .where('date')
       .between(start, end, true, false)
       .count();
+  }, []);
+}
+
+export function useMonthlyRevenue() {
+  return useLiveQuery(async () => {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const start = `${y}-${m}-01`;
+    const end = `${y}-${m}-32`;
+    const records = await db.maintenanceRecords
+      .where('date')
+      .between(start, end, true, false)
+      .toArray();
+    return records.reduce((sum, r) => sum + (r.cost ?? 0), 0);
   }, []);
 }

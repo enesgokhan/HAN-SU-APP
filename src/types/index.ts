@@ -5,7 +5,10 @@ export interface Customer {
   address: string;
   installationDate: string;
   notes: string;
+  deviceModel?: string;
+  deviceSerial?: string;
   maintenanceCycleMonths?: number;
+  maintenanceCycles?: Partial<Record<MaintenanceType, number>>;
   active?: boolean;
   createdAt: string;
   updatedAt: string;
@@ -17,6 +20,7 @@ export interface MaintenanceRecord {
   date: string;
   type: MaintenanceType;
   notes: string;
+  cost?: number;
   createdAt: string;
 }
 
@@ -50,7 +54,7 @@ export interface Plan {
 }
 
 export interface BackupData {
-  version: 1 | 2;
+  version: 1 | 2 | 3;
   exportedAt: string;
   customers: Customer[];
   maintenanceRecords: MaintenanceRecord[];

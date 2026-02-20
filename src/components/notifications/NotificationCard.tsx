@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Phone, Calendar, CheckCircle, Clock, ChevronDown, ChevronUp } from 'lucide-react';
+import { Phone, Calendar, CheckCircle, Clock, ChevronDown, ChevronUp, MessageCircle } from 'lucide-react';
 import type { CustomerMaintenanceView } from '../../types';
 import { TR } from '../../constants/tr';
 import { formatDateShort } from '../../utils/dates';
@@ -36,14 +36,25 @@ export default function NotificationCard({ view, onMaintenanceDone }: Notificati
             </span>
           </div>
 
-          <a
-            href={`tel:${customer.phone.replace(/[^\d+]/g, '')}`}
-            className="inline-flex items-center gap-1.5 text-sm text-gray-500 active:text-water-600 mb-1"
-            aria-label={`${customer.name} ara`}
-          >
-            <Phone size={13} />
-            {customer.phone}
-          </a>
+          <div className="flex items-center gap-2 mb-1">
+            <a
+              href={`tel:${customer.phone.replace(/[^\d+]/g, '')}`}
+              className="inline-flex items-center gap-1.5 text-sm text-gray-500 active:text-water-600"
+              aria-label={`${customer.name} ara`}
+            >
+              <Phone size={13} />
+              {customer.phone}
+            </a>
+            <a
+              href={`https://wa.me/${customer.phone.replace(/\D/g, '')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-green-50 text-green-600 active:bg-green-100"
+              aria-label={`${customer.name} WhatsApp`}
+            >
+              <MessageCircle size={14} />
+            </a>
+          </div>
 
           <div className="flex items-center gap-2 mt-1">
             <Calendar size={13} className="text-gray-400" />

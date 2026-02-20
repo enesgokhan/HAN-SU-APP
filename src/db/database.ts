@@ -21,4 +21,11 @@ db.version(2).stores({
   plans: 'id, customerId, date, status, createdAt',
 });
 
+db.version(3).stores({
+  customers: 'id, name, phone, installationDate, createdAt',
+  maintenanceRecords: 'id, customerId, date, type, createdAt',
+  reminderOverrides: 'id, customerId, snoozedUntil',
+  plans: 'id, customerId, date, status, createdAt',
+});
+
 export { db };

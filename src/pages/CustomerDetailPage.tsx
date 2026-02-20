@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Edit, Trash2, Phone, MapPin, Calendar, FileText, UserX, UserCheck, CalendarCheck, Plus } from 'lucide-react';
-import { TR } from '../constants/tr';
+import { Edit, Trash2, Phone, MapPin, Calendar, FileText, UserX, UserCheck, CalendarCheck, Plus, MessageCircle, Monitor } from 'lucide-react';
+import { TR, MAINTENANCE_TYPE_LABELS } from '../constants/tr';
 import { useCustomer, deleteCustomer, updateCustomer } from '../hooks/useCustomers';
 import { useMaintenanceRecords } from '../hooks/useMaintenance';
 import { useCustomerView } from '../hooks/useDashboard';
@@ -12,7 +12,7 @@ import SnoozeActions from '../components/dashboard/SnoozeActions';
 import ConfirmDialog from '../components/shared/ConfirmDialog';
 import EmptyState from '../components/shared/EmptyState';
 import { showToast } from '../components/shared/Toast';
-import { formatDateTr, formatDateShort, todayISO } from '../utils/dates';
+import { formatDateTr, formatDateShort, todayISO, getPerTypeDueDates } from '../utils/dates';
 import { STATUS_CONFIG, STATUS_LABELS } from '../utils/status';
 import { useCustomerPlans } from '../hooks/usePlans';
 import AddPlanForm from '../components/plans/AddPlanForm';
@@ -109,6 +109,15 @@ export default function CustomerDetailPage() {
           <div className="flex items-center gap-2 text-sm text-gray-700">
             <Phone size={16} className="text-gray-400" />
             <a href={`tel:${customer.phone.replace(/[^\d+]/g, '')}`} className="underline" aria-label={`${customer.name} ara`}>{customer.phone}</a>
+            <a
+              href={`https://wa.me/${customer.phone.replace(/\D/g, '')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-50 text-green-600 active:bg-green-100"
+              aria-label={`${customer.name} WhatsApp`}
+            >
+              <MessageCircle size={16} />
+            </a>
           </div>
           {customer.address && (
             <div className="flex items-start gap-2 text-sm text-gray-700">
@@ -120,6 +129,16 @@ export default function CustomerDetailPage() {
             <Calendar size={16} className="text-gray-400" />
             <span>{TR.installationDate}: {formatDateTr(customer.installationDate)}</span>
           </div>
+          {(customer.deviceModel || customer.deviceSerial) && (
+            <div className="flex items-center gap-2 text-sm text-gray-700">
+              <Monitor size={16} className="text-gray-400" />
+              <span>
+                {customer.deviceModel && customer.deviceModel}
+                {customer.deviceModel && customer.deviceSerial && ' · '}
+                {customer.deviceSerial && <span className="text-gray-500">{customer.deviceSerial}</span>}
+              </span>
+            </div>
+          )}
           {customer.notes && (
             <div className="flex items-start gap-2 text-sm text-gray-700">
               <FileText size={16} className="text-gray-400 mt-0.5" />
@@ -161,6 +180,28 @@ export default function CustomerDetailPage() {
             )}
           </div>
         )}
+
+        {/* Per-type due dates */}
+        {customer.maintenanceCycles && Object.keys(customer.maintenanceCycles).length > 0 && records && (() => {
+          const perType = getPerTypeDueDates(customer, records);
+          if (perType.length === 0) return null;
+          const today = todayISO();
+          return (
+            <div>
+              <h3 className="text-sm font-semibold text-gray-700 mb-2">{TR.perTypeDueDates}</h3>
+              <div className="space-y-1.5">
+                {perType.map(({ type, nextDueDate }) => (
+                  <div key={type} className="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2">
+                    <span className="text-xs text-gray-700">{MAINTENANCE_TYPE_LABELS[type]}</span>
+                    <span className={`text-xs font-medium ${nextDueDate < today ? 'text-red-600' : 'text-gray-600'}`}>
+                      {formatDateShort(nextDueDate)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Scheduled Plans */}
         {(() => {
@@ -205,7 +246,7 @@ export default function CustomerDetailPage() {
         {/* History */}
         <div>
           <h3 className="text-sm font-semibold text-gray-700 mb-2">{TR.maintenanceHistory}</h3>
-          <MaintenanceHistory records={records} />
+          <MaintenanceHistory records={records} customer={customer} />
         </div>
       </div>
 

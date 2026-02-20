@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, Phone } from 'lucide-react';
+import { ChevronRight, Phone, MessageCircle } from 'lucide-react';
 import type { CustomerMaintenanceView } from '../../types';
 import { formatDateShort } from '../../utils/dates';
 import { STATUS_CONFIG, formatDaysText } from '../../utils/status';
@@ -32,6 +32,16 @@ export default function CustomerCard({ view }: CustomerCardProps) {
           <div className="flex items-center gap-1.5 text-xs text-gray-500">
             <Phone size={12} />
             <span>{customer.phone}</span>
+            <a
+              href={`https://wa.me/${customer.phone.replace(/\D/g, '')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={e => e.stopPropagation()}
+              className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-green-50 text-green-600 active:bg-green-100 ml-1"
+              aria-label={`${customer.name} WhatsApp`}
+            >
+              <MessageCircle size={12} />
+            </a>
           </div>
           <div className="flex items-center gap-2 mt-1">
             <span className="text-xs text-gray-500">{formatDateShort(effectiveDueDate)}</span>

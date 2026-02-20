@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Home, Bell, CalendarCheck, Users } from 'lucide-react';
 import { TR } from '../../constants/tr';
@@ -7,6 +8,15 @@ import { useTodayPlanCount } from '../../hooks/usePlans';
 export default function BottomNav() {
   const overdueCount = useOverdueCount() ?? 0;
   const todayPlans = useTodayPlanCount() ?? 0;
+
+  useEffect(() => {
+    if (!('setAppBadge' in navigator)) return;
+    if (overdueCount > 0) {
+      navigator.setAppBadge(overdueCount).catch(() => {});
+    } else {
+      navigator.clearAppBadge?.().catch(() => {});
+    }
+  }, [overdueCount]);
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
     `relative flex flex-col items-center justify-center gap-0.5 py-2 flex-1 text-xs font-medium transition-colors duration-200 min-h-[56px] ${

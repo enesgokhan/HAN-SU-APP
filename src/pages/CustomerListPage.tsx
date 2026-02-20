@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus } from 'lucide-react';
+import { Plus, Download } from 'lucide-react';
 import { TR } from '../constants/tr';
 import { useDashboard } from '../hooks/useDashboard';
 import PageHeader from '../components/layout/PageHeader';
@@ -9,6 +9,8 @@ import FilterPills from '../components/shared/FilterPills';
 import SortMenu from '../components/shared/SortMenu';
 import CustomerCard from '../components/customer/CustomerCard';
 import EmptyState from '../components/shared/EmptyState';
+import { showToast } from '../components/shared/Toast';
+import { exportCustomersCSV } from '../utils/backup';
 
 export default function CustomerListPage() {
   const [search, setSearch] = useState('');
@@ -89,12 +91,28 @@ export default function CustomerListPage() {
       <PageHeader
         title={TR.navCustomers}
         right={
-          <button
-            onClick={() => navigate('/customers/new')}
-            className="w-11 h-11 flex items-center justify-center rounded-xl active:bg-gray-100"
-          >
-            <Plus size={22} className="text-water-600" />
-          </button>
+          <div className="flex gap-0.5">
+            <button
+              onClick={async () => {
+                try {
+                  await exportCustomersCSV();
+                  showToast(TR.csvExported);
+                } catch {
+                  showToast(TR.backupFailed, 'error');
+                }
+              }}
+              aria-label={TR.exportCSV}
+              className="w-11 h-11 flex items-center justify-center rounded-xl active:bg-gray-100"
+            >
+              <Download size={20} className="text-gray-500" />
+            </button>
+            <button
+              onClick={() => navigate('/customers/new')}
+              className="w-11 h-11 flex items-center justify-center rounded-xl active:bg-gray-100"
+            >
+              <Plus size={22} className="text-water-600" />
+            </button>
+          </div>
         }
       />
       <div className="px-4 pt-3 pb-2 space-y-3">

@@ -92,6 +92,35 @@ export function useCustomerPlans(customerId: string | undefined) {
   }, [customerId]);
 }
 
+export function useMonthPlans(year: number, month: number) {
+  return useLiveQuery(async () => {
+    const m = String(month).padStart(2, '0');
+    const start = `${year}-${m}-01`;
+    const end = `${year}-${m}-32`;
+    const plans = await db.plans
+      .where('date')
+      .between(start, end, true, false)
+      .toArray();
+
+    const customers = await db.customers.toArray();
+    const customerMap = new Map(customers.map(c => [c.id, c]));
+
+    return plans.map(p => {
+      const c = customerMap.get(p.customerId);
+      return {
+        id: p.id,
+        customerId: p.customerId,
+        customerName: c?.name ?? '?',
+        customerPhone: c?.phone ?? '',
+        date: p.date,
+        notes: p.notes,
+        status: p.status,
+        createdAt: p.createdAt,
+      } satisfies PlanView;
+    });
+  }, [year, month]);
+}
+
 export async function addPlan(data: { customerId: string; date: string; notes: string }) {
   const now = new Date().toISOString();
   await db.plans.add({
@@ -119,7 +148,7 @@ export async function cancelPlan(id: string) {
 
 export async function completePlan(
   planId: string,
-  maintenanceData: { customerId: string; date: string; type: MaintenanceType; notes: string }
+  maintenanceData: { customerId: string; date: string; type: MaintenanceType; notes: string; cost?: number }
 ) {
   const recordId = crypto.randomUUID();
   await db.transaction('rw', db.plans, db.maintenanceRecords, async () => {

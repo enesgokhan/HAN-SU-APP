@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, Download, Upload, Settings, AlertTriangle, Users, CheckCircle2, ChevronRight, Calendar, CalendarCheck } from 'lucide-react';
 import { TR, MAINTENANCE_TYPE_LABELS } from '../constants/tr';
 import { useDashboard } from '../hooks/useDashboard';
-import { useRecentMaintenance, useMonthlyMaintenanceCount } from '../hooks/useMaintenance';
+import { useRecentMaintenance, useMonthlyMaintenanceCount, useMonthlyRevenue } from '../hooks/useMaintenance';
 import EmptyState from '../components/shared/EmptyState';
 import ConfirmDialog from '../components/shared/ConfirmDialog';
 import { showToast } from '../components/shared/Toast';
@@ -21,6 +21,7 @@ export default function DashboardPage() {
   const views = useDashboard('');
   const recentRecords = useRecentMaintenance(5);
   const monthlyCount = useMonthlyMaintenanceCount();
+  const monthlyRevenue = useMonthlyRevenue();
   const todayPlans = useTodayPlans();
 
   const overdueCount = useMemo(() =>
@@ -93,6 +94,7 @@ export default function DashboardPage() {
       iconBg: 'bg-water-100',
       iconColor: 'text-water-600',
       countColor: 'text-gray-900',
+      subLine: undefined as string | undefined,
     },
     {
       label: TR.overdue,
@@ -101,6 +103,7 @@ export default function DashboardPage() {
       iconBg: 'bg-red-100',
       iconColor: 'text-red-600',
       countColor: overdueCount > 0 ? 'text-red-600' : 'text-gray-900',
+      subLine: undefined as string | undefined,
     },
     {
       label: TR.doneThisMonth,
@@ -109,6 +112,7 @@ export default function DashboardPage() {
       iconBg: 'bg-emerald-100',
       iconColor: 'text-emerald-600',
       countColor: (monthlyCount ?? 0) > 0 ? 'text-emerald-600' : 'text-gray-900',
+      subLine: (monthlyRevenue ?? 0) > 0 ? `₺${monthlyRevenue}` : undefined,
     },
   ];
 
@@ -167,6 +171,7 @@ export default function DashboardPage() {
               </div>
               <div className={`text-2xl font-extrabold ${card.countColor}`}>{card.count}</div>
               <div className="text-xs font-medium text-gray-500 mt-0.5">{card.label}</div>
+              {card.subLine && <div className="text-xs font-semibold text-emerald-600 mt-0.5">{card.subLine}</div>}
             </div>
           ))}
         </div>

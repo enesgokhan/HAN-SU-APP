@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
-import { Plus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Plus, Calendar, List } from 'lucide-react';
 import { TR } from '../constants/tr';
 import { usePlans } from '../hooks/usePlans';
 import type { PlanView } from '../hooks/usePlans';
@@ -8,6 +9,7 @@ import FilterPills from '../components/shared/FilterPills';
 import PlanCard from '../components/plans/PlanCard';
 import AddPlanForm from '../components/plans/AddPlanForm';
 import CompletePlanForm from '../components/plans/CompletePlanForm';
+import CalendarView from '../components/plans/CalendarView';
 import EmptyState from '../components/shared/EmptyState';
 import { todayISO } from '../utils/dates';
 
@@ -15,6 +17,8 @@ export default function PlansPage() {
   const [filter, setFilter] = useState<PlanStatus | 'all'>('scheduled');
   const [showAddForm, setShowAddForm] = useState(false);
   const [completingPlan, setCompletingPlan] = useState<PlanView | null>(null);
+  const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
+  const navigate = useNavigate();
 
   const allPlans = usePlans();
 
@@ -67,13 +71,22 @@ export default function PlansPage() {
       <header className="sticky top-0 z-40 bg-white border-b border-gray-200 px-4 pt-4 pb-3 shadow-[0_1px_3px_rgba(0,0,0,0.04)]" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
         <div className="flex items-center justify-between mb-3">
           <h1 className="text-xl font-bold text-gray-900">{TR.navPlans}</h1>
-          <button
-            onClick={() => setShowAddForm(true)}
-            aria-label={TR.addPlan}
-            className="w-11 h-11 flex items-center justify-center rounded-xl active:bg-gray-100"
-          >
-            <Plus size={22} className="text-water-600" />
-          </button>
+          <div className="flex gap-0.5">
+            <button
+              onClick={() => setViewMode(viewMode === 'list' ? 'calendar' : 'list')}
+              aria-label={viewMode === 'list' ? TR.calendarView : TR.listView}
+              className="w-11 h-11 flex items-center justify-center rounded-xl active:bg-gray-100"
+            >
+              {viewMode === 'list' ? <Calendar size={20} className="text-gray-500" /> : <List size={20} className="text-gray-500" />}
+            </button>
+            <button
+              onClick={() => setShowAddForm(true)}
+              aria-label={TR.addPlan}
+              className="w-11 h-11 flex items-center justify-center rounded-xl active:bg-gray-100"
+            >
+              <Plus size={22} className="text-water-600" />
+            </button>
+          </div>
         </div>
         <FilterPills
           options={filterOptions}
@@ -83,7 +96,9 @@ export default function PlansPage() {
       </header>
 
       <div className="px-4 py-3 space-y-3">
-        {filtered.length > 0 ? (
+        {viewMode === 'calendar' ? (
+          <CalendarView onSelectPlan={plan => navigate(`/customers/${plan.customerId}`)} />
+        ) : filtered.length > 0 ? (
           filtered.map((plan, i) => (
             <div key={plan.id} className={`animate-fade-in-up stagger-${Math.min(i + 1, 8)}`}>
               <PlanCard plan={plan} onComplete={setCompletingPlan} />

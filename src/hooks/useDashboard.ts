@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/database';
 import type { CustomerMaintenanceView, ReminderOverride } from '../types';
-import { getNextDueDate, getEffectiveDueDate, getDaysUntilDue } from '../utils/dates';
+import { getNextDueDate, getEffectiveDueDate, getDaysUntilDue, getEarliestDueDate } from '../utils/dates';
 import { computeStatus } from '../utils/status';
 
 const STATUS_PRIORITY = { overdue: 0, due_soon: 1, upcoming: 2, ok: 3 } as const;
@@ -46,9 +46,20 @@ export function useDashboard(searchQuery: string, includeInactive = false) {
       }
     }
 
+    // Group records by customer for per-type calculations
+    const recordsByCustomer = new Map<string, typeof allRecords>();
+    for (const r of allRecords) {
+      const list = recordsByCustomer.get(r.customerId);
+      if (list) list.push(r);
+      else recordsByCustomer.set(r.customerId, [r]);
+    }
+
     const views: CustomerMaintenanceView[] = customers.map(customer => {
+      const customerRecords = recordsByCustomer.get(customer.id) ?? [];
       const lastMaintenanceDate = lastRecordByCustomer.get(customer.id) ?? null;
-      const nextDueDate = getNextDueDate(customer.installationDate, lastMaintenanceDate, customer.maintenanceCycleMonths);
+      const nextDueDate = customer.maintenanceCycles && Object.keys(customer.maintenanceCycles).length > 0
+        ? getEarliestDueDate(customer, customerRecords)
+        : getNextDueDate(customer.installationDate, lastMaintenanceDate, customer.maintenanceCycleMonths);
       const activeSnooze = latestOverrideByCustomer.get(customer.id) ?? null;
       const effectiveDueDate = getEffectiveDueDate(nextDueDate, activeSnooze);
       const daysUntilDue = getDaysUntilDue(effectiveDueDate);
@@ -89,10 +100,20 @@ export function useOverdueCount() {
       if (!existing || o.createdAt > existing.createdAt) latestOverrideByCustomer.set(o.customerId, o);
     }
 
+    const recordsByCustomer = new Map<string, typeof allRecords>();
+    for (const r of allRecords) {
+      const list = recordsByCustomer.get(r.customerId);
+      if (list) list.push(r);
+      else recordsByCustomer.set(r.customerId, [r]);
+    }
+
     let count = 0;
     for (const c of customers) {
+      const customerRecords = recordsByCustomer.get(c.id) ?? [];
       const lastDate = lastRecordByCustomer.get(c.id) ?? null;
-      const nextDue = getNextDueDate(c.installationDate, lastDate, c.maintenanceCycleMonths);
+      const nextDue = c.maintenanceCycles && Object.keys(c.maintenanceCycles).length > 0
+        ? getEarliestDueDate(c, customerRecords)
+        : getNextDueDate(c.installationDate, lastDate, c.maintenanceCycleMonths);
       const snooze = latestOverrideByCustomer.get(c.id) ?? null;
       const effective = getEffectiveDueDate(nextDue, snooze);
       if (getDaysUntilDue(effective) < 0) count++;
@@ -111,7 +132,9 @@ export function useCustomerView(id: string | undefined) {
     const records = await db.maintenanceRecords.where('customerId').equals(id).sortBy('date');
     const lastRecord = records.length > 0 ? records[records.length - 1] : null;
     const lastMaintenanceDate = lastRecord?.date ?? null;
-    const nextDueDate = getNextDueDate(customer.installationDate, lastMaintenanceDate, customer.maintenanceCycleMonths);
+    const nextDueDate = customer.maintenanceCycles && Object.keys(customer.maintenanceCycles).length > 0
+      ? getEarliestDueDate(customer, records)
+      : getNextDueDate(customer.installationDate, lastMaintenanceDate, customer.maintenanceCycleMonths);
 
     const overrides = await db.reminderOverrides.where('customerId').equals(id).sortBy('createdAt');
     const activeSnooze = overrides.length > 0 ? overrides[overrides.length - 1] : null;

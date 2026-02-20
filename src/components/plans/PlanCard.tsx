@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Phone, CheckCircle, Clock, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Phone, CheckCircle, Clock, X, ChevronDown, ChevronUp, MessageCircle } from 'lucide-react';
 import type { PlanView } from '../../hooks/usePlans';
 import { postponePlan, cancelPlan } from '../../hooks/usePlans';
 import { TR } from '../../constants/tr';
@@ -81,13 +81,24 @@ export default function PlanCard({ plan, onComplete }: PlanCardProps) {
             </div>
 
             {plan.customerPhone && (
-              <a
-                href={`tel:${plan.customerPhone.replace(/[^\d+]/g, '')}`}
-                className="inline-flex items-center gap-1.5 text-sm text-gray-500 active:text-water-600 mb-1"
-              >
-                <Phone size={13} />
-                {plan.customerPhone}
-              </a>
+              <div className="flex items-center gap-2 mb-1">
+                <a
+                  href={`tel:${plan.customerPhone.replace(/[^\d+]/g, '')}`}
+                  className="inline-flex items-center gap-1.5 text-sm text-gray-500 active:text-water-600"
+                >
+                  <Phone size={13} />
+                  {plan.customerPhone}
+                </a>
+                <a
+                  href={`https://wa.me/${plan.customerPhone.replace(/\D/g, '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-green-50 text-green-600 active:bg-green-100"
+                  aria-label={`${plan.customerName} WhatsApp`}
+                >
+                  <MessageCircle size={14} />
+                </a>
+              </div>
             )}
 
             <div className="text-xs text-gray-500 mt-0.5">

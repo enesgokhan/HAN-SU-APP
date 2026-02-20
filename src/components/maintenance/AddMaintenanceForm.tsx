@@ -15,6 +15,7 @@ export default function AddMaintenanceForm({ customerId }: AddMaintenanceFormPro
   const [date, setDate] = useState(todayISO());
   const [type, setType] = useState<MaintenanceType>('filter_replacement');
   const [notes, setNotes] = useState('');
+  const [cost, setCost] = useState('');
   const [saving, setSaving] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -22,11 +23,12 @@ export default function AddMaintenanceForm({ customerId }: AddMaintenanceFormPro
     if (saving) return;
     setSaving(true);
     try {
-      await addMaintenanceRecord({ customerId, date, type, notes: notes.trim() });
+      await addMaintenanceRecord({ customerId, date, type, notes: notes.trim(), cost: cost ? Number(cost) : undefined });
       showToast(TR.maintenanceAdded);
       setDate(todayISO());
       setType('filter_replacement');
       setNotes('');
+      setCost('');
       setOpen(false);
     } catch (err) {
       console.error('Failed to add maintenance:', err);
@@ -74,6 +76,24 @@ export default function AddMaintenanceForm({ customerId }: AddMaintenanceFormPro
             <option key={value} value={value}>{label}</option>
           ))}
         </select>
+      </div>
+      <div>
+        <label className="block text-xs font-medium text-gray-700 mb-1">{TR.cost}</label>
+        <div className="flex gap-2">
+          <div className="flex items-center px-3 rounded-xl border border-gray-300 bg-gray-50 text-base text-gray-500 min-h-[44px] select-none">
+            {TR.currencySymbol}
+          </div>
+          <input
+            type="number"
+            inputMode="decimal"
+            min="0"
+            step="0.01"
+            value={cost}
+            onChange={e => setCost(e.target.value)}
+            placeholder={TR.costPlaceholder}
+            className={`${inputClass} flex-1`}
+          />
+        </div>
       </div>
       <div>
         <label className="block text-xs font-medium text-gray-700 mb-1">{TR.notes}</label>

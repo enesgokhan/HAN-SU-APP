@@ -1,5 +1,6 @@
 import { db } from '../db/database';
 import type { BackupData, MaintenanceType, PlanStatus } from '../types';
+import { getNextDueDate } from './dates';
 
 const VALID_PLAN_STATUSES: PlanStatus[] = ['scheduled', 'completed', 'cancelled'];
 
@@ -12,7 +13,7 @@ const isValidDate = (v: string) => /^\d{4}-\d{2}-\d{2}/.test(v);
 
 export async function exportBackup(): Promise<void> {
   const data: BackupData = {
-    version: 2,
+    version: 3,
     exportedAt: new Date().toISOString(),
     customers: await db.customers.toArray(),
     maintenanceRecords: await db.maintenanceRecords.toArray(),
@@ -57,7 +58,7 @@ export async function importBackup(file: File): Promise<{ success: boolean; erro
       return { success: false, error: 'Geçersiz yedek dosyası formatı' };
     }
 
-    if (raw.version !== 1 && raw.version !== 2) {
+    if (raw.version !== 1 && raw.version !== 2 && raw.version !== 3) {
       return { success: false, error: `Desteklenmeyen versiyon: ${raw.version}` };
     }
 
@@ -81,7 +82,10 @@ export async function importBackup(file: File): Promise<{ success: boolean; erro
       address: (isString(c.address) ? c.address : '') as string,
       installationDate: c.installationDate as string,
       notes: (isString(c.notes) ? c.notes : '') as string,
+      deviceModel: isString(c.deviceModel) ? c.deviceModel : undefined,
+      deviceSerial: isString(c.deviceSerial) ? c.deviceSerial : undefined,
       maintenanceCycleMonths: typeof c.maintenanceCycleMonths === 'number' ? c.maintenanceCycleMonths : undefined,
+      maintenanceCycles: c.maintenanceCycles && typeof c.maintenanceCycles === 'object' ? c.maintenanceCycles as Record<string, number> : undefined,
       active: typeof c.active === 'boolean' ? c.active : undefined,
       createdAt: isString(c.createdAt) ? c.createdAt : new Date().toISOString(),
       updatedAt: isString(c.updatedAt) ? c.updatedAt : new Date().toISOString(),
@@ -112,6 +116,7 @@ export async function importBackup(file: File): Promise<{ success: boolean; erro
       date: r.date as string,
       type: r.type as MaintenanceType,
       notes: isString(r.notes) ? r.notes : '',
+      cost: typeof r.cost === 'number' ? r.cost : undefined,
       createdAt: isString(r.createdAt) ? r.createdAt : new Date().toISOString(),
     }));
 
@@ -177,4 +182,59 @@ export async function importBackup(file: File): Promise<{ success: boolean; erro
   } catch {
     return { success: false, error: 'Dosya okunamadı veya geçersiz JSON formatı' };
   }
+}
+
+export async function exportCustomersCSV(): Promise<void> {
+  const customers = await db.customers.filter(c => c.active !== false).toArray();
+  const records = await db.maintenanceRecords.toArray();
+
+  const lastMaintenanceMap = new Map<string, string>();
+  for (const r of records) {
+    const existing = lastMaintenanceMap.get(r.customerId);
+    if (!existing || r.date > existing) {
+      lastMaintenanceMap.set(r.customerId, r.date);
+    }
+  }
+
+  const escapeCSV = (v: string) => {
+    if (v.includes(',') || v.includes('"') || v.includes('\n')) {
+      return `"${v.replace(/"/g, '""')}"`;
+    }
+    return v;
+  };
+
+  const headers = ['Ad Soyad', 'Telefon', 'Adres', 'Kurulum Tarihi', 'Bakım Periyodu (Ay)', 'Son Bakım', 'Sonraki Bakım'];
+  const rows = customers.map(c => {
+    const lastMaint = lastMaintenanceMap.get(c.id) ?? '';
+    const cycle = c.maintenanceCycleMonths ?? 6;
+    const nextDue = getNextDueDate(c.installationDate, lastMaint || null, cycle);
+    return [
+      escapeCSV(c.name),
+      escapeCSV(c.phone),
+      escapeCSV(c.address),
+      c.installationDate,
+      String(cycle),
+      lastMaint,
+      nextDue,
+    ].join(',');
+  });
+
+  const csv = '\uFEFF' + [headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const fileName = `han-aritma-musteriler-${new Date().toISOString().split('T')[0]}.csv`;
+  const file = new File([blob], fileName, { type: 'text/csv' });
+
+  if (navigator.canShare?.({ files: [file] })) {
+    await navigator.share({ files: [file], title: 'HAN Arıtma Müşteriler' });
+    return;
+  }
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
