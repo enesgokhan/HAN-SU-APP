@@ -63,7 +63,8 @@ function buildFormHtml(data: ServiceFormData): string {
   .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 20px; padding: 0 4px; }
   .field { display: flex; align-items: baseline; gap: 6px; padding: 5px 0; }
   .field-label { font-weight: 600; color: #475569; white-space: nowrap; font-size: 11.5px; min-width: 105px; }
-  .field-value { color: #1a1a1a; flex: 1; border-bottom: 1px solid #cbd5e1; min-height: 20px; padding-bottom: 2px; font-size: 12.5px; }
+  .field-value { color: #1a1a1a; flex: 1; border-bottom: 1px solid #cbd5e1; min-height: 20px; padding-bottom: 2px; font-size: 12.5px; cursor: text; }
+  .field-value:focus { outline: none; border-bottom-color: #0284c7; background: #f0f9ff; border-radius: 2px; }
   .field-full { grid-column: 1 / -1; }
 
   /* Materials table */
@@ -162,19 +163,19 @@ function buildFormHtml(data: ServiceFormData): string {
   <div class="field-grid">
     <div class="field">
       <span class="field-label">${TR.customerName}:</span>
-      <span class="field-value">${e(customer.name)}</span>
+      <span class="field-value" contenteditable="true">${e(customer.name)}</span>
     </div>
     <div class="field">
       <span class="field-label">${TR.customerPhone}:</span>
-      <span class="field-value">${e(customer.phone)}</span>
+      <span class="field-value" contenteditable="true">${e(customer.phone)}</span>
     </div>
     <div class="field field-full">
       <span class="field-label">${TR.customerAddress}:</span>
-      <span class="field-value">${e(customer.address || '')}</span>
+      <span class="field-value" contenteditable="true">${e(customer.address || '')}</span>
     </div>
     <div class="field">
       <span class="field-label">${TR.installationDate}:</span>
-      <span class="field-value">${e(formatDateTr(customer.installationDate))}</span>
+      <span class="field-value" contenteditable="true">${e(formatDateTr(customer.installationDate))}</span>
     </div>
   </div>
 </div>
@@ -185,11 +186,11 @@ function buildFormHtml(data: ServiceFormData): string {
   <div class="field-grid">
     <div class="field">
       <span class="field-label">${TR.deviceModel}:</span>
-      <span class="field-value">${e(customer.deviceModel || '')}</span>
+      <span class="field-value" contenteditable="true">${e(customer.deviceModel || '')}</span>
     </div>
     <div class="field">
       <span class="field-label">${TR.deviceSerial}:</span>
-      <span class="field-value">${e(customer.deviceSerial || '')}</span>
+      <span class="field-value" contenteditable="true">${e(customer.deviceSerial || '')}</span>
     </div>
   </div>
 </div>
@@ -200,15 +201,15 @@ function buildFormHtml(data: ServiceFormData): string {
   <div class="field-grid">
     <div class="field">
       <span class="field-label">${TR.maintenanceDate}:</span>
-      <span class="field-value">${e(formatDateTr(record.date))}</span>
+      <span class="field-value" contenteditable="true">${e(formatDateTr(record.date))}</span>
     </div>
     <div class="field">
       <span class="field-label">${TR.maintenanceType}:</span>
-      <span class="field-value">${e(MAINTENANCE_TYPE_LABELS[record.type] || record.type)}</span>
+      <span class="field-value" contenteditable="true">${e(MAINTENANCE_TYPE_LABELS[record.type] || record.type)}</span>
     </div>
     <div class="field">
       <span class="field-label">${TR.nextMaintenance}:</span>
-      <span class="field-value">${e(formatDateTr(nextMaintenanceDate))}</span>
+      <span class="field-value" contenteditable="true">${e(formatDateTr(nextMaintenanceDate))}</span>
     </div>
   </div>
 </div>
